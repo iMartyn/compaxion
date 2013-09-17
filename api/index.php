@@ -10,6 +10,7 @@ Epi::init('api');
 getRoute()->get('/', 'helloWorld');
 getRoute()->get('/space/status', array('notReallyStaticSpace', 'statusHTML'));
 getRoute()->get('/space/status.json', array('notReallyStaticSpace', 'statusJSON'));
+getRoute()->get('/space/status/set/(.*)', array('notReallyStaticSpace', 'setStatus'));
 getRoute()->run();
 
 function helloWorld() {
