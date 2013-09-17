@@ -25,16 +25,39 @@ Class Space {
         return $document;
     }
 
+    private function jsonToHTML($json,$excludeKeys = null,$excludeRegex = false) {
+        if (!is_null($excludeKeys)) {
+            if (!is_array($excludeKeys)) {
+                $excludeKeys = array($excludeKeys);
+            }
+        } else {
+            $excludeKeys = array();
+        }
+        foreach ($json as $key => $value) {
+            $displayKey = true;
+            if ($excludeRegex) {
+                foreach ($excludeKeys as $pattern) {
+                    if (preg_match($pattern,$key)) {
+                        $displayKey = false;
+                    }
+                }
+            } else {
+                if (in_array($key,$excludeKeys)) {
+                    $displayKey = false;
+                }
+            }
+            if ($displayKey) {
+                echo "<dt>$key</dt><dd>$value</dd>";
+            }
+        }
+    }
+
     public function statusHTML() {
         $data = self::getData();
         echo '<h1>The Space is ' . $data['status'] . '</h1>';
         echo '<p>Other detail :</p>';
         echo '<dl>';
-        foreach ($data as $key => $value) {
-            if ($key[0] !== '_') {
-                echo "<dt>$key</dt><dd>$value</dd>";
-            }
-        }
+        $this->jsonToHTML($data,array('/^_.*/','/^status$/'),true);
         echo '</dl>';
     }
 
