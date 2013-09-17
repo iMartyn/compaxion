@@ -33,7 +33,7 @@ Class Space {
         } else {
             $excludeKeys = array();
         }
-        foreach ($json as $key => $value) {
+        foreach (json_decode($json,true) as $key => $value) {
             $displayKey = true;
             if ($excludeRegex) {
                 foreach ($excludeKeys as $pattern) {
@@ -57,7 +57,7 @@ Class Space {
         echo '<h1>The Space is ' . $data['status'] . '</h1>';
         echo '<p>Other detail :</p>';
         echo '<dl>';
-        $this->jsonToHTML($data,array('/^_.*/','/^status$/'),true);
+        $this->jsonToHTML(json_encode($data),array('/^_.*/','/^status$/'),true);
         echo '</dl>';
     }
 
