@@ -18,7 +18,6 @@ Class Space {
         }
         $document = $this->spaceCollection->findOne();
         if (is_null($document)) {
-            echo '<div class="debug">Setting default space status</div>';
             $document = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => 2);
             $this->spaceCollection->insert($document);
         }
