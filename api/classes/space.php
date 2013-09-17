@@ -65,6 +65,14 @@ Class Space {
         echo $this->jsonToHTML(json_encode($data),array('/^_.*/','/^status$/'),true);
     }
 
+    public function setStatus($status) {
+        $document = self::getData();
+        unset($document['_id']);
+        $document['status'] = $status;
+        $this->spaceCollection->findAndModify(null,$document);
+
+    }
+
     public function statusJSON() {
         echo json_encode(self::getData());
     }
