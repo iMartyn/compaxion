@@ -33,6 +33,7 @@ Class Space {
         } else {
             $excludeKeys = array();
         }
+        $returnString = '<dl>';
         foreach (json_decode($json,true) as $key => $value) {
             $displayKey = true;
             if ($excludeRegex) {
@@ -47,18 +48,22 @@ Class Space {
                 }
             }
             if ($displayKey) {
-                echo "<dt>$key</dt><dd>$value</dd>";
+                if (is_array($value)) {
+                    $returnString .= $this->jsonToHTML(json_encode($value));
+                } else {
+                    $returnString .= "<dt>$key</dt><dd>$value</dd>";
+                }
             }
         }
+        $returnString .= '</dl>';
+        return $returnString;
     }
 
     public function statusHTML() {
         $data = self::getData();
         echo '<h1>The Space is ' . $data['status'] . '</h1>';
         echo '<p>Other detail :</p>';
-        echo '<dl>';
-        $this->jsonToHTML(json_encode($data),array('/^_.*/','/^status$/'),true);
-        echo '</dl>';
+        echo $this->jsonToHTML(json_encode($data),array('/^_.*/','/^status$/'),true);
     }
 
     public function statusJSON() {
