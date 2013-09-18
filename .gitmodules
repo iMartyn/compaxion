@@ -1,3 +1,6 @@
 [submodule "api/epiphany"]
 	path = api/epiphany
 	url = https://github.com/jmathai/epiphany.git
+[submodule "submodules/phpMQTT"]
+	path = submodules/phpMQTT
+	url = https://github.com/bluerhinos/phpMQTT.git
