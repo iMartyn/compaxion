@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='iso-8859-1'?>
+<config>
+	<mongo>
+		<host>localhost</host>
+        <database>compaxion</database>
+	</mongo>
+	<mqtt>
+		<broker>localhost</broker>
+		<port>1883</port>
+		<clientName>compaxion PHP API</clientName>
+	</mqtt>
+</config>
