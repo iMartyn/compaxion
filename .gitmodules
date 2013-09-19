@@ -4,3 +4,6 @@
 [submodule "api/epiphany"]
 	path = api/epiphany
 	url = git@github.com:iMartyn/epiphany.git
+[submodule "submodules/slim"]
+	path = submodules/slim
+	url = https://github.com/codeguy/Slim.git
