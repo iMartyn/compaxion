@@ -3,6 +3,7 @@
 require '../submodules/slim/Slim/Slim.php';
 require_once '../submodules/pimple/lib/Pimple.php';
 require_once 'Controllers/SpaceController.php';
+require_once 'Controllers/MembersController.php';
 \Slim\Slim::registerAutoloader();
 
 function jsonToHTML($json,$excludeKeys = null,$excludeRegex = false) {
@@ -39,51 +40,6 @@ function jsonToHTML($json,$excludeKeys = null,$excludeRegex = false) {
     return $returnString;
 }
 
-function parseAcceptHeader() {
-    $hdr = $_SERVER['HTTP_ACCEPT'];
-    $accept = array();
-    foreach (preg_split('/\s*,\s*/', $hdr) as $i => $term) {
-        $o = new \stdclass;
-        $o->pos = $i;
-        if (preg_match(",^(\S+)\s*;\s*(?:q|level)=([0-9\.]+),i", $term, $M)) {
-            $o->type = $M[1];
-            $o->q = (double)$M[2];
-        } else {
-            $o->type = $term;
-            $o->q = 1;
-        }
-        $accept[] = $o;
-    }
-    usort($accept, function ($a, $b) {
-        /* first tier: highest q factor wins */
-        $diff = $b->q - $a->q;
-        if ($diff > 0) {
-            $diff = 1;
-        } else if ($diff < 0) {
-            $diff = -1;
-        } else {
-            /* tie-breaker: first listed item wins */
-            $diff = $a->pos - $b->pos;
-        }
-        return $diff;
-    });
-    $accept_data = array();
-    foreach ($accept as $a) {
-        $accept_data[$a->type] = $a->type;
-    }
-    return $accept_data;
-}
-
-function whatFormatIsWanted(Array $whatWeCanProvide) {
-    $whatTheClientWants = parseAcceptHeader();
-    foreach ($whatTheClientWants as $aRequestedFormat) {
-        if (in_array($aRequestedFormat, $whatWeCanProvide)) {
-            return $aRequestedFormat;
-        }
-    }
-    return null;
-}
-
 // Because we want to strip .json before the router has to deal with it
 $originalRequestURI = $_SERVER['REQUEST_URI'];
 if (preg_match('/\.json$/',$_SERVER['REQUEST_URI'])) {
@@ -95,26 +51,37 @@ $pimple['app'] = $app;
 $pimple['SpaceController'] = $pimple->share(function ($pimple) {
     return new SpaceController($pimple);
 });
-
-$app->config('server.originalrequest',$originalRequestURI);
-
-$app->get('/space/status', function () use ($pimple) {
-    $format = $pimple['SpaceController']->getRequestedFormat();
-    $data = json_encode($pimple['SpaceController']->getStatus());
-    switch ($format) {
-        case 'json' :
-            echo $data;
-            break;
-        case 'html' :
-            echo jsonToHTML($data, '/^\_.*/', true);
-            break;
-        default :
-            $pimple['app']->halt(406, 'Json or html are only currently known output formats');
-            break;
-    }
+$pimple['MembersController'] = $pimple->share(function ($pimple) {
+    return new MembersController($pimple);
 });
 
-$app->get('/', function() { phpinfo(); });
+function outputJsonOrHTML(Controller $controller,Pimple $pimple,$data) {
+    $format = $controller->getRequestedFormat();
+    if (!is_array($data)) {
+        $data = array("data"=>$data);
+    }
+    $data = json_encode($data);
+    $html = jsonToHTML($data,'/^_.*/',true);
+    if (!file_exists('Templates'.DIRECTORY_SEPARATOR.$format.'.php')) {
+        $pimple['app']->halt(406, 'Unknown request format');
+    }
+    if ($format == 'json') {
+        echo json_decode($data);
+    }
+    $pimple['app']->render($format.'.php',array('data'=>$data,'html'=>$html));
+}
+
+$app->config('server.originalrequest',$originalRequestURI);
+$app->config('templates.path',dirname(__FILE__).DIRECTORY_SEPARATOR.'Templates');
+
+$app->get('/space/status', function () use ($pimple) {
+    outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->getStatus());
+});
+
+$app->get('/member/count', function () use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getMemberCount());
+});
+$app->get('/', function() use ($pimple) { var_dump($pimple['app']->router->getCurrentRoute()); phpinfo(); });
 
 $app->get('/test/:what', function ($what) { var_dump($what); });
 

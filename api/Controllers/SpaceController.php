@@ -26,4 +26,9 @@ class SpaceController extends Controller {
         }
         return $document;
     }
+
+    public function checkAuthorisation(\Slim\Route $route) {
+        //TODO: Actually verify auth
+        return true;
+    }
 }

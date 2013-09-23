@@ -14,7 +14,7 @@ abstract class Controller {
     public function getRequestedFormat() {
         $originalServerRequestPath = $this->app->config('server.originalrequest');
         $requestFormatParam = $this->app->request->params('format');
-        $firstRequestedFormat = whatFormatIsWanted(array('text/html', 'application/json', 'application/javascript'));
+        $firstRequestedFormat = $this->whatFormatIsWanted(array('text/html', 'application/json', 'application/javascript'));
         if (
             // .json ending
             preg_match('/.json$/', $originalServerRequestPath) ||
@@ -64,7 +64,7 @@ abstract class Controller {
     }
 
     public function whatFormatIsWanted(Array $whatWeCanProvide) {
-        $whatTheClientWants = parseAcceptHeader();
+        $whatTheClientWants = $this->parseAcceptHeader();
         foreach ($whatTheClientWants as $aRequestedFormat) {
             if (in_array($aRequestedFormat, $whatWeCanProvide)) {
                 return $aRequestedFormat;
@@ -72,6 +72,12 @@ abstract class Controller {
         }
         return null;
     }
+
+    public function isAuthorised(\Slim\Route $route) {
+        return $this->checkAuthorisation($route);
+    }
+
+    public abstract function checkAuthorisation(\Slim\Route $route);
 
     public abstract function init(Pimple $di);
 
