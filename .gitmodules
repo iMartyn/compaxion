@@ -7,3 +7,6 @@
 [submodule "submodules/slim"]
 	path = submodules/slim
 	url = https://github.com/codeguy/Slim.git
+[submodule "submodules/pimple"]
+	path = submodules/pimple
+	url = https://github.com/fabpot/Pimple.git
