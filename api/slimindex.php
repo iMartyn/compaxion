@@ -1,25 +1,9 @@
 <?php
 
 require '../submodules/slim/Slim/Slim.php';
+require_once '../submodules/pimple/lib/Pimple.php';
+require_once 'Controllers/SpaceController.php';
 \Slim\Slim::registerAutoloader();
-
-function getRequestedFormat($app) {
-    $contentType = $app->request->headers->get('Content-Type');
-    $originalServerRequestPath = $app->config('server.originalrequest');
-    $requestFormatParam = $app->request->params('format');
-    $firstRequestedFormat = whatFormatIsWanted(array('text/html', 'application/json', 'application/javascript'));
-    if (
-        // .json ending
-        preg_match('/.json$/', $originalServerRequestPath) ||
-        // ?format=json
-        $requestFormatParam == 'json' ||
-        // Accept: header
-        $firstRequestedFormat == 'application/json' || $firstRequestedFormat == 'application/javascript'
-    ) {
-        return 'json';
-    }
-    return 'html';
-}
 
 function jsonToHTML($json,$excludeKeys = null,$excludeRegex = false) {
     if (!is_null($excludeKeys)) {
@@ -45,7 +29,7 @@ function jsonToHTML($json,$excludeKeys = null,$excludeRegex = false) {
         }
         if ($displayKey) {
             if (is_array($value)) {
-                $returnString .= $this->jsonToHTML(json_encode($value));
+                $returnString .= "<dl><dt>$key</dt><dd>".jsonToHTML(json_encode($value))."</dd></dl>";
             } else {
                 $returnString .= "<dt>$key</dt><dd>$value</dd>";
             }
@@ -106,25 +90,31 @@ if (preg_match('/\.json$/',$_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = preg_replace('/.json$/','',$_SERVER['REQUEST_URI']);
 }
 $app = new \Slim\Slim();
+$pimple = new Pimple();
+$pimple['app'] = $app;
+$pimple['SpaceController'] = $pimple->share(function ($pimple) {
+    return new SpaceController($pimple);
+});
+
 $app->config('server.originalrequest',$originalRequestURI);
 
-$app->get('/hello/:name', function ($name) {
-    global $app;
-    $returnJson = json_encode(array('Hello' => $name));
-    switch (getRequestedFormat($app)) {
+$app->get('/space/status', function () use ($pimple) {
+    $format = $pimple['SpaceController']->getRequestedFormat();
+    $data = json_encode($pimple['SpaceController']->getStatus());
+    switch ($format) {
         case 'json' :
-            echo $returnJson;
+            echo $data;
             break;
         case 'html' :
-            echo jsonToHTML($returnJson);
+            echo jsonToHTML($data, '/^\_.*/', true);
             break;
         default :
-            $app->halt(406, 'Json or html are only currently known output formats');
+            $pimple['app']->halt(406, 'Json or html are only currently known output formats');
             break;
     }
 });
 
-$app->get('/', phpinfo);
+$app->get('/', function() { phpinfo(); });
 
 $app->get('/test/:what', function ($what) { var_dump($what); });
 
