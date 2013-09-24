@@ -24,8 +24,16 @@ class MembersController extends Controller {
         return $this->membersCollection->count();
     }
 
-    public function getMemberList() {
-        return $this->membersCollection->fetchAll();
+    public function getMemberByUsername($username) {
+        return $this->membersCollection->findOne(array('username'=>$username));
+    }
+
+    public function getAllMembers() {
+        $cursor = $this->membersCollection->find();
+        foreach ($cursor as $member) {
+            $results[(string)$member['_id']] = $member;
+        }
+        return $results;
     }
 
 }

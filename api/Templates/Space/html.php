@@ -1,0 +1,1 @@
+<h1>The space is <?php echo $data['status']; ?>!</h1>

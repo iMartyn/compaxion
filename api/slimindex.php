@@ -49,10 +49,15 @@ function outputJsonOrHTML(Controller $controller,Pimple $pimple,$data) {
     }
     $json = json_encode($data);
     $html = jsonToHTML($json,'/^_.*/',true);
-    if (!file_exists('Templates'.DIRECTORY_SEPARATOR.$format.'.php')) {
+    $classTemplate = str_replace('Controller','',get_class($controller));
+    $templateFolder = dirname(__FILE__).'/Templates';
+    if (!is_dir($templateFolder.'/'.$classTemplate) || !file_exists($templateFolder.'/'.$classTemplate.'/'.$format.'.php')) {
+        $classTemplate = 'default';
+    }
+    if (!file_exists($templateFolder.'/'.$classTemplate.'/'.$format.'.php')) {
         $pimple['app']->halt(406, 'Unknown request format');
     }
-    $pimple['app']->render($format.'.php',array('json'=>$json,'data'=>$data,'html'=>$html));
+    $pimple['app']->render($classTemplate.'/'.$format.'.php',array('json'=>$json,'data'=>$data,'html'=>$html));
 }
 
 // Because we want to strip .json before the router has to deal with it
@@ -89,6 +94,14 @@ $app->get('/space/status/:setto', function ($setTo) use ($pimple) {
 
 $app->get('/member/count', function () use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getMemberCount());
+});
+
+$app->get('/member/:username', function ($username) use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getMemberByUsername($username));
+});
+
+$app->get('/member', function () use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getAllMembers());
 });
 
 $app->get('/devices', function () use ($pimple) {
