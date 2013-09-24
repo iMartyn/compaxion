@@ -65,6 +65,10 @@ $originalRequestURI = $_SERVER['REQUEST_URI'];
 if (preg_match('/\.json$/',$_SERVER['REQUEST_URI'])) {
     $_SERVER['REQUEST_URI'] = preg_replace('/.json$/','',$_SERVER['REQUEST_URI']);
 }
+// Same for csv, 'cos why not!
+if (preg_match('/\.csv$/',$_SERVER['REQUEST_URI'])) {
+    $_SERVER['REQUEST_URI'] = preg_replace('/.csv$/','',$_SERVER['REQUEST_URI']);
+}
 $app = new \Slim\Slim();
 $pimple = new Pimple();
 $pimple['app'] = $app;

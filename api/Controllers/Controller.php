@@ -14,7 +14,7 @@ abstract class Controller {
     public function getRequestedFormat() {
         $originalServerRequestPath = $this->app->config('server.originalrequest');
         $requestFormatParam = $this->app->request->params('format');
-        $firstRequestedFormat = $this->whatFormatIsWanted(array('text/html', 'application/json', 'application/javascript'));
+        $firstRequestedFormat = $this->whatFormatIsWanted(array('text/html', 'application/json', 'application/javascript', 'text/comma-separated-values', 'text/csv', 'application/csv'));
         if (
             // .json ending
             preg_match('/.json$/', $originalServerRequestPath) ||
@@ -24,6 +24,16 @@ abstract class Controller {
             $firstRequestedFormat == 'application/json' || $firstRequestedFormat == 'application/javascript'
         ) {
             return 'json';
+        }
+        if (
+            // .json ending
+            preg_match('/.csv$/', $originalServerRequestPath) ||
+            // ?format=json
+            $requestFormatParam == 'csv' ||
+            // Accept: header - text/comma-separated-values, text/csv, application/csv
+            $firstRequestedFormat == 'text/comma-separated-values' || $firstRequestedFormat == 'text/csv' || $firstRequestedFormat == 'application/csv'
+        ) {
+            return 'csv';
         }
         return 'html';
     }
