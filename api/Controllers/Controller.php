@@ -3,12 +3,28 @@
  * Abstract controller class for dependency injections
  */
 
+use Respect\Validation\Validator as validator;
+
 abstract class Controller {
     protected $app;
 
     public function __construct(Pimple $di) {
         $this->app = $di['app'];
         $this->init($di);
+        if (!$this->isAuthorised($this->app->router->getCurrentRoute())) {
+            $this->app->halt(403, 'You do not have authorisation to access this.');
+        }
+        if (!$this->validateRequest()) {
+            $this->app->halt(400, 'You have submitted an invalid request or invalid data');
+        }
+    }
+
+    public function validateRequest() {
+        /*
+         * We need to validate various types of input - json and url-encoded is fine, but we need to be
+         * able to extend this and have some kind of field verification
+         */
+        return true;
     }
 
     public function getRequestedFormat() {
