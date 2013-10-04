@@ -92,8 +92,8 @@ $app->get('/space/status', function () use ($pimple) {
     outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->getStatus());
 });
 
-$app->get('/space/status/:setto', function ($setTo) use ($pimple) {
-        outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->setStatus($setTo));
+$app->map('/space/status/:setto', function ($setTo) use ($pimple) {
+    outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->setStatus($setTo));
 });
 
 $app->get('/member/count', function () use ($pimple) {
@@ -121,3 +121,4 @@ $app->get('/', function() use ($pimple) { var_dump($pimple['app']->router->getCu
 $app->get('/test/:what', function ($what) { var_dump($what); });
 
 $app->run();
+
