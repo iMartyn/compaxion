@@ -10,3 +10,6 @@
 [submodule "submodules/pimple"]
 	path = submodules/pimple
 	url = https://github.com/fabpot/Pimple.git
+[submodule "submodules/validation"]
+	path = submodules/validation
+	url = https://github.com/Respect/Validation
