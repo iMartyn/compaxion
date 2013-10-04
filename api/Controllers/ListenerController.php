@@ -14,6 +14,13 @@ class ListenerController extends Controller {
     private $config = null;
     private $mqttConnection = null;
 
+
+    public function __construct(Pimple $di) {
+        /* Overriding in here to stop double-verifying the access which calls too many times at the moment */
+        $this->app = $di['app'];
+        $this->init($di);
+    }
+
     public function init(Pimple $di) {
         $this->config = $this->readConfig();
         $mqttConfig = array_pop($this->config->xpath('/config/mqtt'));
