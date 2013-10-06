@@ -19,6 +19,26 @@ abstract class Controller {
         }
     }
 
+    public function getDataAsAssoc() {
+        //TODO: Add some way of checking if the data is post data as json or form-urlencoded
+        return $this->app->request()->getBody();
+    }
+
+    /**
+     * Validates a particular field.
+     * @param $field the field being checked
+     * @param $data the data being validated
+     * @return bool
+     */
+    public function validateField($field,$data) {
+        return true;
+    }
+
+    /**
+     * Validates an entire request via the validateField function
+     * TODO: write me!
+     * @return bool
+     */
     public function validateRequest() {
         /*
          * We need to validate various types of input - json and url-encoded is fine, but we need to be
@@ -107,4 +127,7 @@ abstract class Controller {
 
     public abstract function init(Pimple $di);
 
+    public abstract function getField($field);
+
+    public abstract function setField($field,$setTo);
 }

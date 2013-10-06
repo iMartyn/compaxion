@@ -8,6 +8,33 @@ require_once 'Controllers/ListenerController.php';
 require_once 'Controllers/DevicesController.php';
 \Slim\Slim::registerAutoloader();
 
+
+function validator_autoload($className)
+{
+    $thisClass = str_replace(__NAMESPACE__.'\\', '', __CLASS__);
+
+    $baseDir = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'submodules'.DIRECTORY_SEPARATOR.'validation'.DIRECTORY_SEPARATOR.'library';
+
+    if (substr($baseDir, -strlen($thisClass)) === $thisClass) {
+        $baseDir = substr($baseDir, 0, -strlen($thisClass));
+    }
+
+    $className = ltrim($className, '\\');
+    $fileName  = $baseDir;
+    $namespace = '';
+    if ($lastNsPos = strripos($className, '\\')) {
+        $namespace = substr($className, 0, $lastNsPos);
+        $className = substr($className, $lastNsPos + 1);
+        $fileName  .= str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+    }
+    $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+
+    if (file_exists($fileName)) {
+        require $fileName;
+    }
+}
+spl_autoload_register("validator_autoload");
+
 function jsonToHTML($json,$excludeKeys = null,$excludeRegex = false) {
     if (!is_null($excludeKeys)) {
         if (!is_array($excludeKeys)) {
@@ -88,12 +115,12 @@ $pimple['DevicesController'] = $pimple->share(function ($pimple) {
 $app->config('server.originalrequest',$originalRequestURI);
 $app->config('templates.path',dirname(__FILE__).DIRECTORY_SEPARATOR.'Templates');
 
-$app->get('/space/status', function () use ($pimple) {
-    outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->getStatus());
+$app->get('/space/:field', function ($field) use ($pimple) {
+    outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->getField($field));
 });
 
-$app->map('/space/status/:setto', function ($setTo) use ($pimple) {
-    outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->setStatus($setTo));
+$app->map('/space/:field/:setto', function ($field,$setTo) use ($pimple) {
+    outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->setField($field,$setTo));
 });
 
 $app->get('/member/count', function () use ($pimple) {

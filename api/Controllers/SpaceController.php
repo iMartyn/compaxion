@@ -24,6 +24,18 @@ class SpaceController extends Controller {
         $this->listenerController->listenEvent('space.status.changed',function (){},true);
     }
 
+    public function getField($field) {
+        if ($field == 'status') {
+            return $this->getStatus();
+        }
+    }
+
+    public function setField($field,$setTo) {
+        if ($field == 'status') {
+            return $this->setStatus($setTo);
+        }
+    }
+
     public function getStatus() {
         $this->spaceCollection->findOne();
         $document = $this->spaceCollection->findOne();
