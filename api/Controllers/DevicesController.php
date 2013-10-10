@@ -27,6 +27,7 @@ class DevicesController extends Controller {
     }
 
     public function getDeviceList($member = null) {
+        $results = Array();
         if (!is_null($member)) {
             // first we look at the id
             try {
