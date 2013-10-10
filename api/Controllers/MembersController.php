@@ -36,4 +36,13 @@ class MembersController extends Controller {
         return $results;
     }
 
+    public function getField($field)
+    {
+        // TODO: Implement getField() method.
+    }
+
+    public function setField($field, $setTo)
+    {
+        // TODO: Implement setField() method.
+    }
 }

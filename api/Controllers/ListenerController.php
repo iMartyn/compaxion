@@ -82,4 +82,13 @@ class ListenerController extends Controller {
         }
     }
 
+    public function getField($field)
+    {
+        // TODO: Implement getField() method.
+    }
+
+    public function setField($field, $setTo)
+    {
+        // TODO: Implement setField() method.
+    }
 }
