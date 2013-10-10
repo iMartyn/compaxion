@@ -30,6 +30,7 @@ class MembersController extends Controller {
 
     public function getAllMembers() {
         $cursor = $this->membersCollection->find();
+        $results = Array();
         foreach ($cursor as $member) {
             $results[(string)$member['_id']] = $member;
         }
