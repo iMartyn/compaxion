@@ -65,7 +65,6 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIs($devicecount)
     {
-        var_dump($devicecount);
         throw new PendingException();
     }
 
