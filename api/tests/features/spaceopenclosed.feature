@@ -8,7 +8,7 @@ Feature: Space opens and closes based on occupancy
     Then we are closed
 
   Scenario: When there are devices here, we're open
-    Given the device count is non zero
+    Given the device count is not zero
     Then we are open
 
   Scenario: When there are people here, we're open
