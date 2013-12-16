@@ -12,7 +12,15 @@ Exec { path => [ '/bin/', '/sbin/', '/usr/bin/', '/usr/sbin/' ] }
 File { owner => 0, group => 0, mode => 0644 }
 
 group { 'puppet': ensure => present }
-group { 'www-data': ensure => present }
+group { 'www-data': 
+  ensure => present,
+  require => File['/var/www']
+}
+
+file { "/var/www":
+  ensure => directory,
+  mode => "0777"
+}
 
 user { $::ssh_username:
   shell  => '/bin/bash',
@@ -528,3 +536,31 @@ define postgresql_db (
   }
 }
 
+class mosquitto {
+  package { 'mosquitto':
+    ensure  => installed,
+  }
+  package { 'mosquitto-clients':
+    ensure  => installed,
+  }
+  service { 'mosquitto':
+    ensure  => "running",
+    require  => Package['mosquitto']
+  }
+}
+include mosquitto
+
+class mongodb {
+  package { 'mongodb-server':
+    ensure  => installed,
+  }
+  package { 'mongodb-clients':
+    ensure  => installed,
+  }
+  service { 'mongodb':
+    ensure  => "running",
+    enable  => true,
+    require  => Package['mongodb-server']
+  }
+}
+include mongodb

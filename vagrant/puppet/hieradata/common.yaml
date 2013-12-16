@@ -50,8 +50,8 @@ server:
 nginx:
     vhosts:
         xokEUYbnPg5y:
-            server_name: compaxion-vm.dev
-            www_root: /srv/compaxion-vm.dev
+            server_name: api.compaxion-vm.dev
+            www_root: /srv/compaxion-vm.dev/api
             listen_port: '80'
             index_files:
                 - index.html
