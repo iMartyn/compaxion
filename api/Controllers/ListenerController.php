@@ -23,7 +23,8 @@ class ListenerController extends Controller {
 
     public function init(Pimple $di) {
         $this->config = $this->readConfig();
-        $mqttConfig = array_pop($this->config->xpath('/config/mqtt'));
+        $anArray = $this->config->xpath('/config/mqtt');
+        $mqttConfig = array_pop($anArray);
         $mqttBroker = (string)$mqttConfig->broker;
         $mqttPort = (string)$mqttConfig->port;
         $mqttClientName = (string)$mqttConfig->clientName;
