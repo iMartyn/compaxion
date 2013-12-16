@@ -70,10 +70,12 @@ php:
         pear: {  }
         pecl:
             - pecl_http
+            - mongo
     ini:
         display_errors: On
         error_reporting: '-1'
         session.save_path: /var/lib/php/session
+        extension: mongo.so
     timezone: America/Chicago
 xdebug:
     install: '1'
