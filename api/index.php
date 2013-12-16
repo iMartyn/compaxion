@@ -112,6 +112,10 @@ $app->get('/devices', function () use ($pimple) {
     outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->getDeviceList());
 });
 
+$app->get('/devices/count', function () use ($pimple) {
+    outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->getDeviceCount());
+});
+
 $app->get('/devices/:username', function ($username) use ($pimple) {
     outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->getDeviceList($username));
 });
