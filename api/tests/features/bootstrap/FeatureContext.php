@@ -19,6 +19,12 @@ use Behat\Gherkin\Node\PyStringNode,
  */
 class FeatureContext extends BehatContext
 {
+
+    private $mongoDbConnection = null;
+    private $mongoDatabase = null;
+    private $spaceCollection = null;
+    private $membersCollection = null;
+
     /**
      * Initializes context.
      * Every scenario gets it's own context object.
@@ -28,6 +34,43 @@ class FeatureContext extends BehatContext
     public function __construct(array $parameters)
     {
         // Initialize your context here
+    }
+
+    /**
+     * @BeforeScenario @database
+     */
+    public function cleanDatabase()
+    {
+        // clean database before @database scenarios
+        if (is_null($this->mongoDatabase)) {
+            $this->mongoDbConnection = new MongoClient;
+            $this->mongoDatabase = $this->mongoDbConnection->compaxion;
+            $this->spaceCollection = $this->mongoDatabase->space;
+            $this->membersCollection = $this->mongoDatabase->members;
+            $this->devicesCollection = $this->mongoDatabase->devices;
+        }
+        $document = $this->spaceCollection->remove();
+        $defaultMembersPresent = 2;
+	$document = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => $defaultMembersPresent);
+        $this->spaceCollection->insert($document);
+        $document = $this->membersCollection->remove();
+        for ($i=1;$i<=10;$i++) {
+            $memberIsPresent = ($i <= $defaultMembersPresent);
+            $memberUserName = '';
+            for ($c=1;$c<=6;$c++) {
+                $memberUserName .= chr(rand(ord('a'),ord('z')));
+            }
+            $deviceMac = '';
+            for ($c=1;$c<15;$c++) {
+                if (($c % 3) == 0) {
+                    $deviceMac .= ':';
+                } else {
+                    $deviceMac .= dechex(rand(0,0xf));
+                }
+            }
+            $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array('mac' => $deviceMac, 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent));
+            $this->membersCollection->insert($document);
+	}
     }
 
     /**
@@ -65,7 +108,12 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIs($devicecount)
     {
-        throw new PendingException();
+        $this->membersCollection->update(array('devices.deviceIsVisible'=>true),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
+        for ($i=0;$i<$this->castNumberWordsToNumber($devicecount);$i++) {
+            $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
+            $userName = $doc['username'];
+	    $this->membersCollection->update(array('username'=>$userName),array('$set'=>array('devices.deviceIsVisible'=>true)));
+        }
     }
 
     /**
@@ -73,7 +121,7 @@ class FeatureContext extends BehatContext
      */
     public function nobodyIsCheckedIn()
     {
-        throw new PendingException();
+        $this->membersCollection->update(array(),array('$set'=>array('checked_in'=>false)),array('multiple'=>true));
     }
 
     /**
@@ -89,7 +137,12 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIsNot($devicecount)
     {
-        throw new PendingException();
+        $this->membersCollection->update(array('devices.deviceIsVisible'=>true),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
+        for ($i=0;$i<=$this->castNumberWordsToNumber($devicecount);$i++) {
+            $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
+            $userName = $doc['username'];
+	    $this->membersCollection->update(array('username'=>$userName),array('$set'=>array('devices.deviceIsVisible'=>true)));
+        }
     }
 
     /**
@@ -105,7 +158,8 @@ class FeatureContext extends BehatContext
      */
     public function somebodyIsCheckedIn()
     {
-        throw new PendingException();
+        $this->membersCollection->update(array(),array('$set'=>array('checked_in'=>false)),array('multiple'=>true));
+        $this->membersCollection->update(array(),array('$set'=>array('checked_in'=>false)));
     }
 
     /**
@@ -177,7 +231,9 @@ class FeatureContext extends BehatContext
      */
     public function aMemberIsNotCheckedIn()
     {
-        throw new PendingException();
+        $record = $this->membersCollection->findOne(array('checked_in'=>false));
+	$this->memberWhoIsNotCheckedInUsername = $record['username'];
+        echo "We are using {$this->memberWhoIsNotCheckedInUsername} for the user who is not checked in.\n";
     }
 
     /**
