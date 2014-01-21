@@ -1,3 +1,4 @@
+@database
 Feature: Space opens and closes based on occupancy
   In order for the space to be opened or closed
   The occupancy based on checkins/outs and devices should be at cetain levels
