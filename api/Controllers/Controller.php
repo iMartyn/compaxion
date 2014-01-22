@@ -55,7 +55,11 @@ abstract class Controller {
     }
 
     public function parseAcceptHeader() {
-        $hdr = $_SERVER['HTTP_ACCEPT'];
+        if (!array_key_exists('HTTP_ACCEPT',$_SERVER)) {
+            $hdr = '*/*';
+        } else {
+            $hdr = $_SERVER['HTTP_ACCEPT'];
+        }
         $accept = array();
         foreach (preg_split('/\s*,\s*/', $hdr) as $i => $term) {
             $o = new \stdclass;
