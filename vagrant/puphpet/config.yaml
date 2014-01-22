@@ -25,6 +25,13 @@ vagrantfile-local:
                     - '--verbose'
                     - '--hiera_config /vagrant/puphpet/puppet/hiera.yaml'
                     - '--parser future'
+            puppet-local:
+                manifests_path: local
+                manifest_file: manifest.pp
+                options:
+                    - '--verbose'
+                    - '--hiera_config /vagrant/puphpet/puppet/hiera.yaml'
+                    - '--parser future'
         synced_folder: {  }
         usable_port_range: 2200..2250
     ssh:
