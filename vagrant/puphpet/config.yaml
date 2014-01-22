@@ -7,23 +7,23 @@ vagrantfile-local:
         network:
             private_network: 192.168.56.101
             forwarded_port:
-                HWPks4gqSRR6:
-                    host: ''
-                    guest: ''
+                lAK3Tjh0u8L6:
+                    host: '6229'
+                    guest: '22'
         provider:
             virtualbox:
                 modifyvm:
-                    name: compaxion-vm
                     natdnshostresolver1: on
                     memory: '512'
                 setextradata:
                     VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root: 1
         provision:
             puppet:
-                manifests_path: puppet/manifests
+                manifests_path: puphpet/puppet
+                manifest_file: manifest.pp
                 options:
-                    - --verbose
-                    - '--hiera_config /vagrant/hiera.yaml'
+                    - '--verbose'
+                    - '--hiera_config /vagrant/puphpet/puppet/hiera.yaml'
                     - '--parser future'
         synced_folder: {  }
         usable_port_range: 2200..2250
@@ -38,30 +38,21 @@ vagrantfile-local:
         forward_x11: false
         shell: 'bash -l'
     vagrant:
-        host: ':detect'
+        host: detect
 server:
     packages:
         - vim
-        - joe
     dot_files:
         -
             bash_aliases: null
     _prevent_empty: ''
 nginx:
     vhosts:
-        xokEUYbnPg5y:
+        2TQ4oa6edFKJ:
             server_name: api.compaxion-vm.dev
+            server_aliases:
+                - api.compaxion-vm.dev
             www_root: /srv/compaxion-vm.dev/api
-            listen_port: '80'
-            index_files:
-                - index.html
-                - index.htm
-                - index.php
-            envvars:
-                - 'APP_ENV dev'
-        xokEUYbnPg5z:
-            server_name: frontend.compaxion-vm.dev
-            www_root: /srv/compaxion-vm.dev/frontend/web
             listen_port: '80'
             index_files:
                 - index.html
@@ -80,12 +71,10 @@ php:
         pear: {  }
         pecl:
             - pecl_http
-            - mongo
     ini:
         display_errors: On
         error_reporting: '-1'
         session.save_path: /var/lib/php/session
-        extension: mongo.so
     timezone: America/Chicago
 xdebug:
     install: '1'
@@ -96,8 +85,27 @@ xdebug:
         xdebug.remote_enable: '1'
         xdebug.remote_handler: dbgp
         xdebug.remote_port: '9000'
-postgresql:
+drush:
+    install: 0
+    settings:
+        drush.tag_branch: 6.x
+mysql:
     root_password: '123'
-    user_group: postgres
+    phpmyadmin: 0
+    adminer: 0
     databases: {  }
+mongodb:
+    install: '1'
+    auth: 1
+    port: '27017'
+    databases: {  }
+beanstalkd:
+    install: 0
+    listenaddress: 0.0.0.0
+    listenport: '13000'
+    maxjobsize: '65535'
+    maxconnections: '1024'
+    binlogdir: /var/lib/beanstalkd/binlog
+    binlogfsync: null
+    binlogsize: '10485760'
 
