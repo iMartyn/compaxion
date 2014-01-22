@@ -6,6 +6,7 @@ use Behat\Behat\Context\ClosuredContextInterface,
     Behat\Behat\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode,
     Behat\Gherkin\Node\TableNode;
+use Guzzle\Http\Client;
 
 //
 // Require 3rd-party libraries here:
@@ -24,6 +25,7 @@ class FeatureContext extends BehatContext
     private $mongoDatabase = null;
     private $spaceCollection = null;
     private $membersCollection = null;
+    private $restClient = null;
 
     /**
      * Initializes context.
@@ -34,6 +36,7 @@ class FeatureContext extends BehatContext
     public function __construct(array $parameters)
     {
         // Initialize your context here
+	$this->restClient = new Client('http://api.compaxion-vm.dev');
     }
 
     /**
@@ -129,7 +132,14 @@ class FeatureContext extends BehatContext
      */
     public function weAreClosed()
     {
-        throw new PendingException();
+        $status = $this->restClient->get('/space/status.json')->send()->json();
+        if (is_array($status) && array_key_exists('status',$status)) {
+            if (strToLower($status['status']) !== 'closed') {
+                throw new Exception('Expected status to be "closed" - got '.$status['status']);
+            }
+        } else {
+            throw new Exception('Unexpected return from API');
+        }
     }
 
     /**
@@ -150,7 +160,14 @@ class FeatureContext extends BehatContext
      */
     public function weAreOpen()
     {
-        throw new PendingException();
+        $status = $this->restClient->get('/space/status.json')->send()->json();
+        if (is_array($status) && array_key_exists('status',$status)) {
+            if (strToLower($status['status']) !== 'open') {
+                throw new Exception('Expected status to be "open" - got '.$status['status']);
+            }
+        } else {
+            throw new Exception('Unexpected return from API');
+        }
     }
 
     /**
