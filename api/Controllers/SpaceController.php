@@ -13,24 +13,41 @@ class SpaceController extends Controller {
     private $mongoDbConnection = null;
     private $mongoDatabase = null;
     private $spaceCollection = null;
+    private $membersCollection = null;
     private $listenerController = null;
 
     public function init(Pimple $di) {
         $this->mongoDbConnection = new MongoClient;
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
         $this->spaceCollection = $this->mongoDatabase->space;
+        $this->membersCollection = $this->mongoDatabase->members;
         $this->listenerController = $di['ListenerController'];
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('space.status.changed',function (){},true);
     }
 
-    public function getStatus() {
+    private function areWeOpen() {
+        $checkedInUsers = $this->membersCollection->find(array('checkedin',true));
+        $presentDevices = $this->membersCollection->find(array('devices.deviceIsVisible',"xyzzy"));
+        return $presentDevices->count();
+    }
+
+    public function getStatus($trustTheDB = false) {
         $this->spaceCollection->findOne();
         $document = $this->spaceCollection->findOne();
         if (is_null($document)) {
             $document = $this->defaultStatus;
             $this->spaceCollection->insert($document);
         }
+//        if (!$trustTheDB) {
+             if ($this->areWeOpen()) {
+//                $this->setStatus('open');
+                $document['status'] = $this->areWeOpen();//'Open';
+             } else {
+//                $this->setStatus('closed');
+                $document['status'] = $this->areWeOpen();//'Closed';
+            }
+//        }
         return $document;
     }
 
@@ -57,7 +74,7 @@ class SpaceController extends Controller {
         }
         $document['status'] = $status;
         $this->spaceCollection->findAndModify(null,$document);
-        return $this->getStatus();
+        return $this->getStatus(true);
     }
 
     public function checkAuthorisation(\Slim\Route $route) {
