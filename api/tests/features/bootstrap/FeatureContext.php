@@ -245,7 +245,15 @@ class FeatureContext extends BehatContext
      */
     public function allTheirDevicesAreFlaggedAs($arg1)
     {
-        throw new PendingException();
+        $status = $this->restClient->get('/member/'.$this->arbitraryMember['username'].'.json')->send()->json();
+	if (!is_array($status['devices'])) {
+            throw new Exception('Cannot test this functionality as member has no devices!');
+        }
+        foreach ($status['devices'] as $device) {
+            if (!array_key_exists('deviceHiddenUntilUnseen', $device) || !$device['deviceHiddenUntilUnseen']) {
+                throw new Exception($status['username'].'\'s device "'.$device['desc'].'" has NOT been set hidden!');
+            }
+        }
     }
 
     /**
