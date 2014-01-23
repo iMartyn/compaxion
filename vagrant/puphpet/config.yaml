@@ -49,6 +49,7 @@ vagrantfile-local:
 server:
     packages:
         - vim
+        - mosquitto
     dot_files:
         -
             bash_aliases: null
