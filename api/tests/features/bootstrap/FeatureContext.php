@@ -49,7 +49,7 @@ class FeatureContext extends BehatContext
             $params = array('checked_in'=>$checkedin);
         }
         $cursor = $this->membersCollection->find($params);
-        $record = $cursor->limit(-1)->skip(rand(0,$cursor->count()))->getNext();
+        $record = $cursor->limit(-1)->skip(rand(0,$cursor->count()-1))->getNext();
         $this->arbitraryMember = $record;
         echo "We are using {$record['username']} as the arbritary member.";
         return $record; //don't have to but might as well.
