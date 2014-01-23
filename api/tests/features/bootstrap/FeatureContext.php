@@ -261,6 +261,9 @@ class FeatureContext extends BehatContext
      */
     public function theyAreTheLastMemberPresent()
     {
+        $this->nobodyIsCheckedIn();
+        $this->getRandomMember();
+        $this->checkInMember();
         $membersHereCount = $this->membersCollection->find(array('checked_in'=>true))->count();
         if ($membersHereCount !== 1) {
             throw new Exception('Expecting exactly 1 member present, got '.$membersHereCount);
