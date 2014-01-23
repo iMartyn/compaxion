@@ -26,6 +26,7 @@ class FeatureContext extends BehatContext
     private $spaceCollection = null;
     private $membersCollection = null;
     private $restClient = null;
+    private $arbitraryMember = null;
 
     /**
      * Initializes context.
@@ -224,7 +225,8 @@ class FeatureContext extends BehatContext
      */
     public function someoneClocksOut()
     {
-        throw new PendingException();
+        $member = $this->getRandomMember(true);
+	$status = $this->restClient->get('/member/'.$member['username'].'/checkout.json')->send()->json();
     }
 
     /**
@@ -232,7 +234,10 @@ class FeatureContext extends BehatContext
      */
     public function checkOutMember()
     {
-        throw new PendingException();
+        $status = $this->restClient->get('/member/'.$this->arbitraryMember['username'].'.json')->send()->json();
+        if ($status['checked_in']) {
+            throw new Exception('Expected '.$this->arbitraryMember['username'].' to be checked out but they were checked in!');
+        }
     }
 
     /**
