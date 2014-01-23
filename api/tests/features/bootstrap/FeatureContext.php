@@ -39,6 +39,21 @@ class FeatureContext extends BehatContext
 	$this->restClient = new Client('http://api.compaxion-vm.dev');
     }
 
+    private function getRandomMember($checkedin = null) {
+        if (is_null($checkedin)) {
+            // We don't care if they're checked in or not
+            $params = array();
+        } else {
+            // We do!
+            $params = array('checked_in'=>$checkedin);
+        }
+        $cursor = $this->membersCollection->find($params);
+        $record = $cursor->limit(-1)->skip(rand(0,$cursor->count()))->getNext();
+        $this->arbitraryMember = $record;
+        echo "We are using {$record['username']} as the arbritary member.";
+        return $record; //don't have to but might as well.
+    }
+
     /**
      * @BeforeScenario @database
      */
@@ -111,7 +126,7 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIs($devicecount)
     {
-        $this->membersCollection->update(array('devices.deviceIsVisible'=>true),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
+        $this->membersCollection->update(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
         for ($i=0;$i<$this->castNumberWordsToNumber($devicecount);$i++) {
             $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
             $userName = $doc['username'];
@@ -147,7 +162,7 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIsNot($devicecount)
     {
-        $this->membersCollection->update(array('devices.deviceIsVisible'=>true),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
+        $this->membersCollection->update(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
         for ($i=0;$i<=$this->castNumberWordsToNumber($devicecount);$i++) {
             $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
             $userName = $doc['username'];
@@ -175,8 +190,9 @@ class FeatureContext extends BehatContext
      */
     public function somebodyIsCheckedIn()
     {
-        $this->membersCollection->update(array(),array('$set'=>array('checked_in'=>false)),array('multiple'=>true));
-        $this->membersCollection->update(array(),array('$set'=>array('checked_in'=>false)));
+        $this->nobodyIsCheckedIn();
+        $member = $this->getRandomMember();
+        $this->membersCollection->update(array('username'=>$member['username']),array('$set'=>array('checked_in'=>true)));
     }
 
     /**
@@ -232,7 +248,10 @@ class FeatureContext extends BehatContext
      */
     public function theyAreTheLastMemberPresent()
     {
-        throw new PendingException();
+        $membersHereCount = $this->membersCollection->find(array('checked_in'=>true))->count();
+        if ($membersHereCount !== 1) {
+            throw new Exception('Expecting exactly 1 member present, got '.$membersHereCount);
+        }
     }
 
     /**
@@ -248,9 +267,8 @@ class FeatureContext extends BehatContext
      */
     public function aMemberIsNotCheckedIn()
     {
-        $record = $this->membersCollection->findOne(array('checked_in'=>false));
-	$this->memberWhoIsNotCheckedInUsername = $record['username'];
-        echo "We are using {$this->memberWhoIsNotCheckedInUsername} for the user who is not checked in.\n";
+        $this->getRandomMember(false);
+        echo "We are using {$this->arbitraryMember['username']} for the user who is not checked in.\n";
     }
 
     /**
@@ -282,7 +300,7 @@ class FeatureContext extends BehatContext
      */
     public function thereIsOnlyOneDeviceInRange()
     {
-        throw new PendingException();
+        $this->theDeviceCountIs(1);
     }
 
     /**
@@ -298,7 +316,7 @@ class FeatureContext extends BehatContext
      */
     public function thereAreDevicesVisible()
     {
-        throw new PendingException();
+        $this->theDeviceCountIsNot(0);
     }
 
     /**

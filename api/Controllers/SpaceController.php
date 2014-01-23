@@ -27,9 +27,9 @@ class SpaceController extends Controller {
     }
 
     private function areWeOpen() {
-        $checkedInUsers = $this->membersCollection->find(array('checkedin',true));
-        $presentDevices = $this->membersCollection->find(array('devices.deviceIsVisible',"xyzzy"));
-        return $presentDevices->count();
+        $checkedInUsers = $this->membersCollection->find(array('checked_in',true));
+        $presentDevices = $this->membersCollection->find(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)));
+        return ($presentDevices->count() > 0 || $checkedInUsers->count() > 0);
     }
 
     public function getStatus($trustTheDB = false) {
@@ -39,15 +39,15 @@ class SpaceController extends Controller {
             $document = $this->defaultStatus;
             $this->spaceCollection->insert($document);
         }
-//        if (!$trustTheDB) {
+        if (!$trustTheDB) {
              if ($this->areWeOpen()) {
-//                $this->setStatus('open');
-                $document['status'] = $this->areWeOpen();//'Open';
+                $this->setStatus('open');
+                $document['status'] = 'Open';
              } else {
-//                $this->setStatus('closed');
-                $document['status'] = $this->areWeOpen();//'Closed';
+                $this->setStatus('closed');
+                $document['status'] = 'Closed';
             }
-//        }
+        }
         return $document;
     }
 
