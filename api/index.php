@@ -104,6 +104,14 @@ $app->get('/member/:username', function ($username) use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getMemberByUsername($username));
 });
 
+$app->get('/member/:username/checkin', function ($username) use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->checkinMemberByUsername($username));
+});
+
+$app->get('/member/:username/checkout', function ($username) use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->checkoutMemberByUsername($username));
+});
+
 $app->get('/member', function () use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getAllMembers());
 });
