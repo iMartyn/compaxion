@@ -4,3 +4,4 @@ bin/
 vendor/
 composer.lock
 .vagrant/
+*.swp
