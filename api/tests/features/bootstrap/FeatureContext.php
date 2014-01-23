@@ -87,7 +87,7 @@ class FeatureContext extends BehatContext
                     $deviceMac .= dechex(rand(0,0xf));
                 }
             }
-            $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array('mac' => $deviceMac, 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent));
+            $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array(array('mac' => $deviceMac, 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent)));
             $this->membersCollection->insert($document);
 	}
     }
@@ -127,11 +127,21 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIs($devicecount)
     {
-        $this->membersCollection->update(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
+        $allMembers = $this->membersCollection->find();
+        foreach ($allMembers as $member) {
+            foreach($member['devices'] as $deviceid=>$device) {
+                $member['devices'][$deviceid]['deviceIsVisible'] = false;
+            }
+            $this->membersCollection->update(array('username'=>$member['username']), $member);
+        }
         for ($i=0;$i<$this->castNumberWordsToNumber($devicecount);$i++) {
             $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
             $userName = $doc['username'];
-	    $this->membersCollection->update(array('username'=>$userName),array('$set'=>array('devices.deviceIsVisible'=>true)));
+	    $member = $this->membersCollection->findOne(array('username'=>$userName));
+            foreach($member['devices'] as $deviceid=>$device) {
+                $member['devices'][$deviceid]['deviceIsVisible'] = true;
+            }
+            $this->membersCollection->update(array('username'=>$member['username']), $member);
         }
     }
 
@@ -163,12 +173,7 @@ class FeatureContext extends BehatContext
      */
     public function theDeviceCountIsNot($devicecount)
     {
-        $this->membersCollection->update(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)),array('$set'=>array('devices.deviceIsVisible'=>false)),array('multiple'=>true));
-        for ($i=0;$i<=$this->castNumberWordsToNumber($devicecount);$i++) {
-            $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
-            $userName = $doc['username'];
-	    $this->membersCollection->update(array('username'=>$userName),array('$set'=>array('devices.deviceIsVisible'=>true)));
-        }
+        $this->theDeviceCountIs($devicecount+1);
     }
 
     /**
