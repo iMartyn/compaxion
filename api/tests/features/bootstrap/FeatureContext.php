@@ -55,6 +55,34 @@ class FeatureContext extends BehatContext
         return $record; //don't have to but might as well.
     }
 
+    private function generateUniqueUsername() {
+        $memberUserName = '';
+        for ($c=1;$c<=6;$c++) {
+            $memberUserName .= chr(rand(ord('a'),ord('z')));
+        }
+        if ($this->membersCollection->find(array('username'=>$memberUserName))->count() > 0) {
+            return $this->generateUniqueUsername();
+        } else {
+            return $memberUserName;
+        }
+    }
+
+    private function generateUniqueMac() {
+        $deviceMac = '';
+        for ($c=1;$c<15;$c++) {
+            if (($c % 3) == 0) {
+                $deviceMac .= ':';
+            } else {
+                $deviceMac .= dechex(rand(0,0xf));
+            }
+        }
+        if ($this->membersCollection->find(array('device.mac'=>$deviceMac))->count() > 0) {
+            return $this->generateUniqueMac();
+        } else {
+            return $deviceMac;
+        }
+    }
+
     /**
      * @BeforeScenario @database
      */
@@ -75,18 +103,8 @@ class FeatureContext extends BehatContext
         $document = $this->membersCollection->remove();
         for ($i=1;$i<=10;$i++) {
             $memberIsPresent = ($i <= $defaultMembersPresent);
-            $memberUserName = '';
-            for ($c=1;$c<=6;$c++) {
-                $memberUserName .= chr(rand(ord('a'),ord('z')));
-            }
-            $deviceMac = '';
-            for ($c=1;$c<15;$c++) {
-                if (($c % 3) == 0) {
-                    $deviceMac .= ':';
-                } else {
-                    $deviceMac .= dechex(rand(0,0xf));
-                }
-            }
+            $memberUserName = $this->generateUniqueUserName();
+            $deviceMac = $this->generateUniqueMac();
             $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array(array('mac' => $deviceMac, 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent)));
             $this->membersCollection->insert($document);
 	}
