@@ -22,8 +22,15 @@ class SpaceController extends Controller {
         $this->spaceCollection = $this->mongoDatabase->space;
         $this->membersCollection = $this->mongoDatabase->members;
         $this->listenerController = $di['ListenerController'];
+        $this->listenerController->listenEvent('member.status.changed',function (){ $this->closeIfNoMembersPresent(); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('space.status.changed',function (){},true);
+    }
+
+    private function closeIfNoMembersPresent() {
+        if (!$this->areWeOpen()) {
+            $this->setStatus('closed');
+        }
     }
 
     private function areWeOpen() {

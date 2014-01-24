@@ -14,6 +14,8 @@ class MembersController extends Controller {
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
         $this->membersCollection = $this->mongoDatabase->members;
         $this->listenerController = $di['ListenerController'];
+        // need to initialise the space controller so it can respond to events
+        $this->spaceController = $di['SpaceController'];
         $this->listenerController->listenEvent('device.appear',function($data) { $this->membersDeviceAppears($data); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('member.status.changed',function (){},true);
