@@ -22,19 +22,20 @@ class SpaceController extends Controller {
         $this->spaceCollection = $this->mongoDatabase->space;
         $this->membersCollection = $this->mongoDatabase->members;
         $this->listenerController = $di['ListenerController'];
-        $this->listenerController->listenEvent('member.status.changed',function (){ $this->closeIfNoMembersPresent(); },true);
+        $this->listenerController->listenEvent('member.status.changed',function ($data){ $this->closeIfWeShouldbe(); },true);
+        $this->listenerController->listenEvent('device.disappear',function ($data){ $this->closeIfWeShouldbe(); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
-        $this->listenerController->listenEvent('space.status.changed',function (){},true);
+        $this->listenerController->listenEvent('space.status.changed',function ($data){},true);
     }
 
-    private function closeIfNoMembersPresent() {
+    private function closeIfWeShouldbe() {
         if (!$this->areWeOpen()) {
             $this->setStatus('closed');
         }
     }
 
     private function areWeOpen() {
-        $checkedInUsers = $this->membersCollection->find(array('checked_in',true));
+        $checkedInUsers = $this->membersCollection->find(array('checked_in'=>true));
         $presentDevices = $this->membersCollection->find(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)));
         return ($presentDevices->count() > 0 || $checkedInUsers->count() > 0);
     }
