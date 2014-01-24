@@ -62,6 +62,10 @@ class DevicesController extends Controller {
 
     public function deviceDisappears($mac = null) {
         $member = $this->getMemberByMac($mac,Array('username','devices'));
+        if (is_null($member)) {
+            $this->listenerController->triggerEvent('device.unknown.disappear',array('mac'=>$mac));
+            return null;
+        }
         $membersDevices = $member['devices'];
         foreach ($membersDevices as $arrayindex=>$device) {
             if (
