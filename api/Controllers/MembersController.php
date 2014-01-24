@@ -14,6 +14,7 @@ class MembersController extends Controller {
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
         $this->membersCollection = $this->mongoDatabase->members;
         $this->listenerController = $di['ListenerController'];
+        $this->listenerController->listenEvent('device.appear',function($data) { $this->membersDeviceAppears($data); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('member.status.changed',function (){},true);
     }
@@ -21,6 +22,21 @@ class MembersController extends Controller {
     public function checkAuthorisation(\Slim\Route $route) {
         //TODO: Actually verify auth
         return true;
+    }
+
+    private function isMemberCheckedIn($username) {
+        $member = $this->getMemberByUsername($username);
+        if (is_null($member) || (!array_key_exists('checked_in',$member)) || !$member['checked_in']) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private function membersDeviceAppears($data) {
+        syslog(LOG_NOTICE,"Member's device has appeared!");
+        if (!$this->isMemberCheckedIn($data['member']))
+            $this->checkMemberInOrOut($data['member'],true);
     }
 
     public function checkMemberInOrOut($username,$in) {
