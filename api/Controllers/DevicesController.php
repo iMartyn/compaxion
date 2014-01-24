@@ -50,12 +50,12 @@ class DevicesController extends Controller {
                 $device['deviceIsVisible']
             ) {
                 $membersDevices[$arrayindex]['deviceIsVisible'] = true;
-                $this->listenerController->triggerEvent('device.appear',array('mac' => $mac,'member' => $member['username']));
             }
         }
         if ($membersDevices != $member['devices']) {
             $this->membersCollection->findAndModify(array('username'=>$member['username']),array('$set'=>array('devices'=>$membersDevices)));
             $member['devices'] = $membersDevices;
+            $this->listenerController->triggerEvent('device.appear',array('mac' => $mac,'member' => $member['username']));
         }
         return $member;
     }
@@ -73,12 +73,12 @@ class DevicesController extends Controller {
                 ((array_key_exists('deviceHiddenUntilUnseen',$device) && $device['deviceHiddenUntilUnseen']))
             ) {
                 $membersDevices[$arrayindex]['deviceIsVisible'] = false;
-                $this->listenerController->triggerEvent('device.disappear',array('mac' => $mac,'member' => $member['username']));
             }
         }
         if ($membersDevices != $member['devices']) {
             $this->membersCollection->findAndModify(array('username'=>$member['username']),array('$set'=>array('devices'=>$membersDevices)));
             $member['devices'] = $membersDevices;
+            $this->listenerController->triggerEvent('device.disappear',array('mac' => $mac,'member' => $member['username']));
         }
         return $member;
     }
