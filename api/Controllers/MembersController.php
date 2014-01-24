@@ -17,6 +17,7 @@ class MembersController extends Controller {
         // need to initialise the space controller so it can respond to events
         $this->spaceController = $di['SpaceController'];
         $this->listenerController->listenEvent('device.appear',function($data) { $this->membersDeviceAppears($data); },true);
+        $this->listenerController->listenEvent('device.disappear',function($data) { $this->membersDeviceDisappears($data); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('member.status.changed',function (){},true);
     }
@@ -36,9 +37,13 @@ class MembersController extends Controller {
     }
 
     private function membersDeviceAppears($data) {
-        syslog(LOG_NOTICE,"Member's device has appeared!");
         if (!$this->isMemberCheckedIn($data['member']))
             $this->checkMemberInOrOut($data['member'],true);
+    }
+
+    private function membersDeviceDisappears($data) {
+        if ($this->isMemberCheckedIn($data['member']))
+            $this->checkMemberInOrOut($data['member'],false);
     }
 
     public function checkMemberInOrOut($username,$in) {
