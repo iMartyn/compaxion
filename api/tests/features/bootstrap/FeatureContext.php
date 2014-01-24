@@ -226,7 +226,7 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @When /^someone clocks out$/
+    * @When /^someone clocks out$/
      */
     public function someoneClocksOut()
     {
@@ -345,7 +345,7 @@ class FeatureContext extends BehatContext
      */
     public function theForceCloseButtonIsPressed()
     {
-        throw new PendingException();
+        $this->restClient->get('/space/status/close');
     }
 
     /**
@@ -353,7 +353,14 @@ class FeatureContext extends BehatContext
      */
     public function setAllVisibleDevicesTo($arg1)
     {
-        throw new PendingException();
+        switch ($arg1) {
+            case "ignored until unseen" : $hidden = true;
+            break;
+	}
+        $count = $this->membersCollection->find(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>$hidden)))->count();
+        if ($count != 0) {
+            throw new Exception("Expected to see 0 non-hidden visible devices, saw $count.");
+        }
     }
 
 }
