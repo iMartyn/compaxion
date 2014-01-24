@@ -26,14 +26,14 @@ Feature: Space opens and closes based on occupancy
     Given somebody is checked in
     When someone clocks out
     Then they are checked out
-    And all their devices are flagged as "ignored until unseen"
+    And all their visible devices are flagged as "ignored until unseen"
 
   Scenario: When the last user clocks out, the space closes
     Given somebody is checked in
     And they are the last member present
     When they clock out
     Then they are checked out
-    And all their devices are flagged as "ignored until unseen"
+    And all their visible devices are flagged as "ignored until unseen"
     And we are closed
 
   Scenario: When a device appears, that member is here
