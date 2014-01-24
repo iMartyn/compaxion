@@ -68,11 +68,9 @@ class DevicesController extends Controller {
         }
         $membersDevices = $member['devices'];
         foreach ($membersDevices as $arrayindex=>$device) {
-            if (
-                (($device['mac'] == $mac) && $device['deviceIsVisible']) &!
-                ((array_key_exists('deviceHiddenUntilUnseen',$device) && $device['deviceHiddenUntilUnseen']))
-            ) {
+            if (($device['mac'] == $mac) && $device['deviceIsVisible']) {
                 $membersDevices[$arrayindex]['deviceIsVisible'] = false;
+                $membersDevices[$arrayindex]['deviceHiddenUntilUnseen'] = false;
             }
         }
         if ($membersDevices != $member['devices']) {
