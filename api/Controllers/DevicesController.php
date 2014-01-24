@@ -3,6 +3,8 @@
  * Controller for members' devices
  */
 
+//TODO: track unknown devices so the network isn't flooded.
+
 class DevicesController extends Controller {
 
     private $mongoDbConnection = null;
@@ -13,9 +15,11 @@ class DevicesController extends Controller {
         $this->mongoDbConnection = new MongoClient;
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
         $this->membersCollection = $this->mongoDatabase->members;
+        $this->listenerController = $di['ListenerController'];
         // need to initialise the members controller so it can respond to events
         $this->membersController = $di['MembersController'];
-        $this->listenerController = $di['ListenerController'];
+        // need to initialise the space controller so it can respond to events
+        $this->spaceController = $di['SpaceController'];
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('device.appear',function (){},true);
         $this->listenerController->listenEvent('device.disappear',function (){},true);
@@ -40,7 +44,11 @@ class DevicesController extends Controller {
         }
         $membersDevices = $member['devices'];
         foreach ($membersDevices as $arrayindex=>$device) {
-            if (($device['mac'] == $mac) &! ((array_key_exists('deviceHiddenUntilUnseen',$device) && $device['deviceHiddenUntilUnseen']))) {
+            if (
+                ($device['mac'] == $mac) &!
+                ((array_key_exists('deviceHiddenUntilUnseen',$device) && $device['deviceHiddenUntilUnseen'])) &!
+                $device['deviceIsVisible']
+            ) {
                 $membersDevices[$arrayindex]['deviceIsVisible'] = true;
                 $this->listenerController->triggerEvent('device.appear',array('mac' => $mac,'member' => $member['username']));
             }
@@ -56,7 +64,10 @@ class DevicesController extends Controller {
         $member = $this->getMemberByMac($mac,Array('username','devices'));
         $membersDevices = $member['devices'];
         foreach ($membersDevices as $arrayindex=>$device) {
-            if (($device['mac'] == $mac) &! ((array_key_exists('deviceHiddenUntilUnseen',$device) && $device['deviceHiddenUntilUnseen']))) {
+            if (
+                (($device['mac'] == $mac) && $device['deviceIsVisible']) &!
+                ((array_key_exists('deviceHiddenUntilUnseen',$device) && $device['deviceHiddenUntilUnseen']))
+            ) {
                 $membersDevices[$arrayindex]['deviceIsVisible'] = false;
                 $this->listenerController->triggerEvent('device.disappear',array('mac' => $mac,'member' => $member['username']));
             }
