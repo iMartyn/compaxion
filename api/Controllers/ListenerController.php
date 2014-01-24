@@ -59,7 +59,9 @@ class ListenerController extends Controller {
     }
 
     public function triggerEvent($triggeredHookName,$hookData) {
-        foreach ($this->hooks as $hookName => $hook) {
+        foreach ($this->hooks as $hookdetail) {
+            $hookName = $hookdetail['hookname'];
+            $hook = $hookdetail['callable'];
             if ($triggeredHookName == $hookName) {
                 if (in_array($hookName,$this->mqttHooks)) {
                     if ($this->mqttConnection->connect()) {
@@ -75,7 +77,7 @@ class ListenerController extends Controller {
     }
 
     public function listenEvent($hookName, $callable, $mqttJson = false) {
-        $this->hooks[$hookName] = $callable;
+        $this->hooks[] = array('hookname'=>$hookName,'callable'=>$callable);
         if (!in_array($hookName,$this->mqttHooks) && $mqttJson) {
             $this->mqttHooks[$hookName] = true;
         } else if (in_array($hookName,$this->mqttHooks) &! $mqttJson) {
