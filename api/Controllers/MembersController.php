@@ -46,12 +46,26 @@ class MembersController extends Controller {
             $this->checkMemberInOrOut($data['member'],false);
     }
 
+    private function ignoreDevicesUntilGone($username) {
+        $member = $this->getMemberByUsername($username);
+        $devices = $member['devices'];
+        foreach ($devices as $index=>$device) {
+            if ($device['deviceIsVisible']) {
+                $devices[$index]['deviceHiddenUntilUnseen'] = true;
+            }
+        }
+        if ($devices !== $member['devices']) {
+            $this->membersCollection->findAndModify(array('username'=>$username),array('$set'=>array('devices'=>$devices)));
+        }
+    }
+
     public function checkMemberInOrOut($username,$in) {
         $document = $this->membersCollection->findOne(array('username'=>$username),array('username'=>true,'checked_in'=>true));
         if ($document['checked_in'] != $in) {
             $this->membersCollection->update(array('username'=>$username),array('$set'=>array('checked_in'=>$in)));
             $document['checked_in'] = $in;
             $this->listenerController->triggerEvent('member.status.changed',array('checked_in' => $in,'username' => $username));
+            $this->ignoreDevicesUntilGone($username);
         }
         return $document;
     }
