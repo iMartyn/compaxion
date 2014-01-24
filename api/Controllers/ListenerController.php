@@ -64,15 +64,15 @@ class ListenerController extends Controller {
             $hookName = $hookdetail['hookname'];
             $hook = $hookdetail['callable'];
             if ($triggeredHookName == $hookName) {
+                if (is_callable($hook)) {
+                    $hook($hookData);
+                }
                 if (in_array($hookName,$this->mqttHooks) &! $triggeredMQTT) {
                     if ($this->mqttConnection->connect()) {
                         $this->mqttConnection->publish($hookName,json_encode($hookData),0);
                         $this->mqttConnection->close();
                         $triggeredMQTT = true;
                     }
-                }
-                if (is_callable($hook)) {
-                    $hook($hookData);
                 }
             }
         }
