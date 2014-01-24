@@ -234,15 +234,10 @@ class FeatureContext extends BehatContext
      */
     public function checkInMember()
     {
-        throw new PendingException();
-    }
-
-    /**
-     * @Given /^open the space$/
-     */
-    public function openTheSpace()
-    {
-        throw new PendingException();
+	$status = $this->restClient->get('/member/'.$this->arbitraryMember['username'].'/checkin.json')->send()->json();
+        if (!$status['checked_in']) {
+            throw new Exception('Expected '.$this->arbitraryMember['username'].' to be checked in but they were not!');
+        }
     }
 
     /**
@@ -287,20 +282,11 @@ class FeatureContext extends BehatContext
     public function theyAreTheLastMemberPresent()
     {
         $this->nobodyIsCheckedIn();
-        $this->getRandomMember();
         $this->checkInMember();
         $membersHereCount = $this->membersCollection->find(array('checked_in'=>true))->count();
         if ($membersHereCount !== 1) {
             throw new Exception('Expecting exactly 1 member present, got '.$membersHereCount);
         }
-    }
-
-    /**
-     * @Given /^close the space$/
-     */
-    public function closeTheSpace()
-    {
-        throw new PendingException();
     }
 
     /**
@@ -380,6 +366,39 @@ class FeatureContext extends BehatContext
         $count = $this->membersCollection->find(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>$hidden)))->count();
         if ($count != 0) {
             throw new Exception("Expected to see 0 non-hidden visible devices, saw $count.");
+        }
+    }
+
+    /**
+     * @Then /^they are checked in$/
+     */
+    public function theyAreCheckedIn()
+    {
+        $memberStatus = $this->restClient->get('/member/'.$this->arbitraryMember['username'].'.json')->send()->json();
+        if (!$memberStatus['checked_in']) {
+            throw new Exception("Expected the member to be checked in, they werent!");
+        }
+    }
+
+    /**
+     * @Then /^they are checked out$/
+     */
+    public function theyAreCheckedOut()
+    {
+        $memberStatus = $this->restClient->get('/member/'.$this->arbitraryMember['username'].'.json')->send()->json();
+        if ($memberStatus['checked_in']) {
+            throw new Exception("Expected the member to be checked out, they werent!");
+        }
+    }
+
+    /**
+     * @When /^they clock out$/
+     */
+    public function theyClockOut()
+    {
+	$status = $this->restClient->get('/member/'.$this->arbitraryMember['username'].'/checkout.json')->send()->json();
+        if ($status['checked_in']) {
+            throw new Exception('Expected '.$this->arbitraryMember['username'].' to be checked out but they were not!');
         }
     }
 

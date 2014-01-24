@@ -19,51 +19,46 @@ Feature: Space opens and closes based on occupancy
   Scenario: When someone unlocks the door, the space opens
     Given nobody is checked in
     When someone unlocks the upstairs door
-    Then check in member
-    And open the space
+    Then they are checked in
     And we are open
 
   Scenario: When user clocks out, ignore their devices until unseen
     Given somebody is checked in
     When someone clocks out
-    Then check out member
+    Then they are checked out
     And all their devices are flagged as "ignored until unseen"
 
   Scenario: When the last user clocks out, the space closes
     Given somebody is checked in
     And they are the last member present
-    When someone clocks out
-    Then check out member
+    When they clock out
+    Then they are checked out
     And all their devices are flagged as "ignored until unseen"
-    And close the space
     And we are closed
 
   Scenario: When a device appears, that member is here
     Given a member is not checked in
     When a device appears
     And device belongs to that user
-    Then check in member
+    Then they are checked in
 
   Scenario: When the first device is seen and the space is closed, people are here, so we're open
     Given the device count is zero
     And nobody is checked in
     When a device appears
     And device belongs to a member
-    Then check in member
-    And open the space
+    Then they are checked in
     And we are open
 
   Scenario: When the last unignored device vanishes, the space closes if there is noone checked in
     Given nobody is checked in
     And there is only one device in range
     When a device disappears
-    Then close the space
-    And we are closed
+    Then we are closed
 
   Scenario: When the space is open, and the "Force close" button is pressed, close
     Given somebody is checked in
     And there are devices visible
     When the force close button is pressed
     Then set all visible devices to "ignored until unseen"
-    And close the space
     And we are closed
