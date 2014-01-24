@@ -38,15 +38,13 @@ Feature: Space opens and closes based on occupancy
 
   Scenario: When a device appears, that member is here
     Given a member is not checked in
-    When a device appears
-    And device belongs to that user
+    When a device appears belonging to them
     Then they are checked in
 
   Scenario: When the first device is seen and the space is closed, people are here, so we're open
     Given the device count is zero
     And nobody is checked in
-    When a device appears
-    And device belongs to a member
+    When a device appears belonging to a member
     Then they are checked in
     And we are open
 

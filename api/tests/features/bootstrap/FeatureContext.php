@@ -55,6 +55,24 @@ class FeatureContext extends BehatContext
         return $record; //don't have to but might as well.
     }
 
+    private function getMembersDevices($username) {
+        return $this->membersCollection->findOne(array('username'=>$username),array('devices'=>1))['devices'];
+    }
+
+    private function hideAllDevices() {
+        $allMembers = $this->membersCollection->find(array(),array('username'=>1,'devices'=>1));
+        foreach ($allMembers as $member) {
+            $devices = $member['devices'];
+            foreach ($member['devices'] as $arrayIndex=>$memberDevice) {
+                $devices[$arrayIndex]['deviceIsVisible'] = false;
+                $devices[$arrayIndex]['deviceHiddenUntilUnseen'] = false;
+            }
+            if ($devices !== $member['devices']) {
+                $this->membersCollection->findAndModify(array('username'=>$member['username']),array('$set'=>array('devices'=>$devices)));
+            }
+        }
+    }
+
     private function generateUniqueUsername() {
         $memberUserName = '';
         for ($c=1;$c<=6;$c++) {
@@ -222,14 +240,6 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @When /^someone unlocks the upstairs door$/
-     */
-    public function someoneUnlocksTheUpstairsDoor()
-    {
-        throw new PendingException();
-    }
-
-    /**
      * @Then /^check in member$/
      */
     public function checkInMember()
@@ -299,43 +309,11 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @When /^a device appears$/
-     */
-    public function aDeviceAppears()
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Given /^device belongs to that user$/
-     */
-    public function deviceBelongsToThatUser()
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Given /^device belongs to a member$/
-     */
-    public function deviceBelongsToAMember()
-    {
-        throw new PendingException();
-    }
-
-    /**
      * @Given /^there is only one device in range$/
      */
     public function thereIsOnlyOneDeviceInRange()
     {
         $this->theDeviceCountIs(1);
-    }
-
-    /**
-     * @When /^a device disappears$/
-     */
-    public function aDeviceDisappears()
-    {
-        throw new PendingException();
     }
 
     /**
@@ -400,6 +378,35 @@ class FeatureContext extends BehatContext
         if ($status['checked_in']) {
             throw new Exception('Expected '.$this->arbitraryMember['username'].' to be checked out but they were not!');
         }
+    }
+
+    /**
+     * @When /^a device appears belonging to them$/
+     */
+    public function aDeviceAppearsBelongingToThem()
+    {
+        $this->hideAllDevices();
+        $theirDevices = $this->getMembersDevices($this->arbitraryMember['username']);
+        $index = rand(0,sizeof($theirDevices)-1);
+        if (sizeof($theirDevices) < 1 || !array_key_exists('mac',$theirDevices[$index])) {
+            throw new Exception("Members have to have a device with a mac to test this functionality.");
+        }
+        $this->restClient->get('/device/'.$theirDevices[$index]['mac'].'/appear')->send();
+    }
+
+    /**
+     * @When /^a device appears belonging to a member$/
+     */
+    public function aDeviceAppearsBelongingToAMember()
+    {
+        $this->hideAllDevices();
+        $this->getRandomMember(false);
+        $theirDevices = $this->getMembersDevices($this->arbitraryMember['username']);
+        $index = rand(0,sizeof($theirDevices)-1);
+        if (sizeof($theirDevices) < 1 || !array_key_exists('mac',$theirDevices[$index])) {
+            throw new Exception("Members have to have a device with a mac to test this functionality.");
+        }
+        $this->restClient->get('/device/'.$theirDevices[$index]['mac'].'/appear')->send();
     }
 
 }
