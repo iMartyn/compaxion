@@ -116,12 +116,20 @@ $app->get('/member', function () use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getAllMembers());
 });
 
-$app->get('/devices', function () use ($pimple) {
+$app->get('/device', function () use ($pimple) {
     outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->getDeviceList());
 });
 
-$app->get('/devices/count', function () use ($pimple) {
+$app->get('/device/count', function () use ($pimple) {
     outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->getDeviceCount());
+});
+
+$app->get('/device/:mac/appear', function ($mac) use ($pimple) {
+    outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->deviceAppears($mac));
+});
+
+$app->get('/device/:mac/disappear', function ($mac) use ($pimple) {
+    outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->deviceDisappears($mac));
 });
 
 $app->get('/devices/:username', function ($username) use ($pimple) {
@@ -131,6 +139,8 @@ $app->get('/devices/:username', function ($username) use ($pimple) {
 $app->get('/', function() use ($pimple) { var_dump($pimple['app']->router->getCurrentRoute()); phpinfo(); });
 
 $app->get('/test/:what', function ($what) { var_dump($what); });
+
+$app->get('/test/:what/thehell', function ($what) { var_dump($what); echo "<br/>THE HELL!"; });
 
 $app->run();
 
