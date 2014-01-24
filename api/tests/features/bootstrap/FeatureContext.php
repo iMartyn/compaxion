@@ -104,8 +104,10 @@ class FeatureContext extends BehatContext
         for ($i=1;$i<=10;$i++) {
             $memberIsPresent = ($i <= $defaultMembersPresent);
             $memberUserName = $this->generateUniqueUserName();
-            $deviceMac = $this->generateUniqueMac();
-            $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array(array('mac' => $deviceMac, 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent)));
+            $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array(
+                array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent),
+                array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s laptop", 'deviceIsVisible' => $memberIsPresent)
+            ));
             $this->membersCollection->insert($document);
 	}
     }
