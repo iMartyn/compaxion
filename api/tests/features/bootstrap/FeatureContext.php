@@ -329,7 +329,7 @@ class FeatureContext extends BehatContext
      */
     public function theForceCloseButtonIsPressed()
     {
-        $this->restClient->get('/space/status/close.json');
+        $this->restClient->get('/space/status/close.json')->send();
     }
 
     /**
