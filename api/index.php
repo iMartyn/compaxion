@@ -92,7 +92,7 @@ $app->get('/space/status', function () use ($pimple) {
     outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->getStatus());
 });
 
-$app->map('/space/status/:setto', function ($setTo) use ($pimple) {
+$app->get('/space/status/:setto', function ($setTo) use ($pimple) {
     outputJsonOrHTML($pimple['SpaceController'],$pimple,$pimple['SpaceController']->setStatus($setTo));
 });
 
@@ -134,6 +134,10 @@ $app->get('/device/:mac/disappear', function ($mac) use ($pimple) {
 
 $app->get('/devices/:username', function ($username) use ($pimple) {
     outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->getDeviceList($username));
+});
+
+$app->get('/devices/:username/hide', function ($username) use ($pimple) {
+    outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->hideUsersDevices($username));
 });
 
 $app->get('/', function() use ($pimple) { var_dump($pimple['app']->router->getCurrentRoute()); phpinfo(); });

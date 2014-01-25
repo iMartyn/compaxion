@@ -120,4 +120,18 @@ class DevicesController extends Controller {
         return $results;
     }
 
+    public function hideUsersDevices($username) {
+        $member = $this->membersController->getMemberByUsername($username);
+        $membersDevices = $member['devices'];
+        foreach ($membersDevices as $arrayindex=>$device) {
+            if ($device['deviceIsVisible']) {
+                $membersDevices[$arrayindex]['deviceHiddenUntilUnseen'] = true;
+            }
+        }
+        if ($membersDevices != $member['devices']) {
+            $this->membersCollection->findAndModify(array('username'=>$member['username']),array('$set'=>array('devices'=>$membersDevices)));
+            $member['devices'] = $membersDevices;
+        }
+    }
+
 }

@@ -94,4 +94,12 @@ class MembersController extends Controller {
         return $results;
     }
 
+    public function checkOutAllMembers() {
+        $cursor = $this->membersCollection->find(array('checked_in'=>true));
+        foreach ($cursor as $member) {
+            syslog(LOG_DEBUG,"checking out {$member['username']}");
+            $this->checkoutMemberByUsername($member['username']);
+        }
+    }
+
 }

@@ -15,6 +15,8 @@ class SpaceController extends Controller {
     private $spaceCollection = null;
     private $membersCollection = null;
     private $listenerController = null;
+    private $membersController = null;
+    private $di = null;
 
     public function init(Pimple $di) {
         $this->mongoDbConnection = new MongoClient;
@@ -27,6 +29,7 @@ class SpaceController extends Controller {
         $this->listenerController->listenEvent('device.appear',function ($data){ $this->closeOrOpenIfWeShouldbe(); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('space.status.changed',function ($data){},true);
+        $this->di = $di;
     }
 
     private function closeOrOpenIfWeShouldbe() {
@@ -70,7 +73,6 @@ class SpaceController extends Controller {
             $this->spaceCollection->insert($document);
         }
         unset($document['_id']);
-        $originalStatus = $document['status'];
         // "Closed", "Close" and "False" are strings that evaluate to true but
         // we want as closed, all else should be true i.e. Open.
         if (strtolower($to) == 'closed' || strtolower($to) == 'close' || strtolower($to) == 'false') {
@@ -80,7 +82,16 @@ class SpaceController extends Controller {
         } else {
             $status = 'Closed';
         }
-        if ($document['status'] != $status) {
+        if ($status = 'Closed') {
+            //We just closed.  Force close button pressed.
+            $membersController = $this->di['MembersController'];
+            $devicesController = $this->di['DevicesController'];
+            // Set the devices hidden first or the user will check back in!
+            $presentDevices = $this->membersCollection->find(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)));
+            foreach ($presentDevices as $actuallyAMemberRecord) {
+                $devicesController->hideUsersDevices($actuallyAMemberRecord['username']);
+            }
+            $membersController->checkOutAllMembers();
             $this->listenerController->triggerEvent('space.status.changed',array('status' => $status));
         }
         $document['status'] = $status;
