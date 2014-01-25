@@ -175,9 +175,10 @@ class FeatureContext extends BehatContext
         for ($i=0;$i<$this->castNumberWordsToNumber($devicecount);$i++) {
             $doc = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>false));
             $userName = $doc['username'];
-	    $member = $this->membersCollection->findOne(array('username'=>$userName));
+            $member = $this->membersCollection->findOne(array('username'=>$userName));
             foreach($member['devices'] as $deviceid=>$device) {
                 $member['devices'][$deviceid]['deviceIsVisible'] = true;
+                break;
             }
             $this->membersCollection->update(array('username'=>$member['username']), $member);
         }
@@ -409,4 +410,17 @@ class FeatureContext extends BehatContext
         $this->restClient->get('/device/'.$theirDevices[$index]['mac'].'/appear')->send();
     }
 
+    /**
+     * @When /^a device disappears$/
+     */
+    public function aDeviceDisappears()
+    {
+        $devices = $this->membersCollection->findOne(array('devices.deviceIsVisible'=>true,'devices.deviceHiddenUntilUnseen'=>array('$ne'=>true)))['devices'];
+        foreach ($devices as $device) {
+            if ($device['deviceIsVisible']) {
+                $this->restClient->get('/device/'.$device['mac'].'/disappear')->send();
+                break;
+            }
+        }
+    }
 }
