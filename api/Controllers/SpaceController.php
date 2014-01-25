@@ -82,7 +82,7 @@ class SpaceController extends Controller {
         } else {
             $status = 'Closed';
         }
-        if ($status = 'Closed') {
+        if ($status == 'Closed') {
             //We just closed.  Force close button pressed.
             $membersController = $this->di['MembersController'];
             $devicesController = $this->di['DevicesController'];
