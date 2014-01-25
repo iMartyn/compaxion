@@ -30,6 +30,7 @@ Feature: Space opens and closes based on occupancy
 
   Scenario: When the last user clocks out, the space closes
     Given somebody is checked in
+    And the device count is zero
     And they are the last member present
     When they clock out
     Then they are checked out

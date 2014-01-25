@@ -51,7 +51,7 @@ class FeatureContext extends BehatContext
         $cursor = $this->membersCollection->find($params);
         $record = $cursor->limit(-1)->skip(rand(0,$cursor->count()-1))->getNext();
         $this->arbitraryMember = $record;
-        echo "We are using {$record['username']} as the arbritary member.";
+        echo "We are using {$record['username']} as the arbritary member.\n";
         return $record; //don't have to but might as well.
     }
 
@@ -114,17 +114,17 @@ class FeatureContext extends BehatContext
             $this->membersCollection = $this->mongoDatabase->members;
             $this->devicesCollection = $this->mongoDatabase->devices;
         }
-        $document = $this->spaceCollection->remove();
+        $document = $this->spaceCollection->remove(array());
         $defaultMembersPresent = 2;
-	$document = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => $defaultMembersPresent);
+        $document = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => $defaultMembersPresent);
         $this->spaceCollection->insert($document);
-        $document = $this->membersCollection->remove();
+        $document = $this->membersCollection->remove(array());
         for ($i=1;$i<=10;$i++) {
             $memberIsPresent = ($i <= $defaultMembersPresent);
             $memberUserName = $this->generateUniqueUserName();
             $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array(
-                array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => $memberIsPresent),
-                array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s laptop", 'deviceIsVisible' => $memberIsPresent)
+                array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => false),
+                array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s laptop", 'deviceIsVisible' => false)
             ));
             $this->membersCollection->insert($document);
 	}
@@ -329,7 +329,7 @@ class FeatureContext extends BehatContext
      */
     public function theForceCloseButtonIsPressed()
     {
-        $this->restClient->get('/space/status/close');
+        $this->restClient->get('/space/status/close.json');
     }
 
     /**
