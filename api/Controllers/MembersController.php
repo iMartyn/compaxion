@@ -65,7 +65,9 @@ class MembersController extends Controller {
             $this->membersCollection->update(array('username'=>$username),array('$set'=>array('checked_in'=>$in)));
             $document['checked_in'] = $in;
             $this->listenerController->triggerEvent('member.status.changed',array('checked_in' => $in,'username' => $username));
-            $this->ignoreDevicesUntilGone($username);
+            if (!$in) {
+                $this->ignoreDevicesUntilGone($username);
+            }
         }
         return $document;
     }
@@ -97,7 +99,6 @@ class MembersController extends Controller {
     public function checkOutAllMembers() {
         $cursor = $this->membersCollection->find(array('checked_in'=>true));
         foreach ($cursor as $member) {
-            syslog(LOG_DEBUG,"checking out {$member['username']}");
             $this->checkoutMemberByUsername($member['username']);
         }
     }
