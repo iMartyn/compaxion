@@ -55,6 +55,20 @@ class FeatureContext extends BehatContext
         return $record; //don't have to but might as well.
     }
 
+    private function getRandomCard($checkedin = null) {
+        if (is_null($checkedin)) {
+            // We don't care if they're checked in or not
+            $params = array();
+        } else {
+            // We do!
+            $params = array('checked_in'=>$checkedin);
+        }
+        $cursor = $this->membersCollection->find($params);
+        $record = $cursor->limit(-1)->skip(rand(0,$cursor->count()-1))->getNext();
+        $carddetail = $record['cards'][rand(0,count($record['cards']))];
+        return $carddetail['id']; //don't have to but might as well.
+    }
+
     private function getMembersDevices($username) {
         return $this->membersCollection->findOne(array('username'=>$username),array('devices'=>1))['devices'];
     }
@@ -86,19 +100,37 @@ class FeatureContext extends BehatContext
     }
 
     private function generateUniqueMac() {
-        $deviceMac = '';
-        for ($c=1;$c<15;$c++) {
-            if (($c % 3) == 0) {
-                $deviceMac .= ':';
-            } else {
-                $deviceMac .= dechex(rand(0,0xf));
-            }
-        }
+        $deviceMac = $this->generateMacishString();
         if ($this->membersCollection->find(array('device.mac'=>$deviceMac))->count() > 0) {
             return $this->generateUniqueMac();
         } else {
             return $deviceMac;
         }
+    }
+
+    private function generateMacishString($hexPairs = 6) {
+        $macishString = '';
+        for ($c=1;$c<($hexPairs*3);$c++) {
+            if (($c % 3) == 0) {
+                $macishString .= ':';
+            } else {
+                $macishString .= dechex(rand(0,0xf));
+            }
+        }
+        return $macishString;
+    }
+
+    private function generateUniqueCardId() {
+        $deviceId = $this->generateMacishString(4);
+        if ($this->membersCollection->find(array('card.id'=>$deviceId))->count() > 0) {
+            return $this->generateUniqueId();
+        } else {
+            return $deviceId;
+        }
+    }
+
+    private function getCardPin() {
+        throw new PendingException();
     }
 
     /**
@@ -125,6 +157,8 @@ class FeatureContext extends BehatContext
             $document = array('username' => $memberUserName, 'checked_in' => $memberIsPresent, 'devices' => array(
                 array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s phone", 'deviceIsVisible' => false),
                 array('mac' => $this->generateUniqueMac(), 'desc' => $memberUserName . "'s laptop", 'deviceIsVisible' => false)
+            ),'cards' => array(
+                array('id' => $this->generateUniqueCardId(), 'desc' => $memberUserName ."'s keycard")
             ));
             $this->membersCollection->insert($document);
 	}
@@ -258,6 +292,18 @@ class FeatureContext extends BehatContext
     {
         $member = $this->getRandomMember(true);
 	$status = $this->restClient->get('/member/'.$member['username'].'/checkout.json')->send()->json();
+    }
+
+    /**
+     * @When /^someone unlocks the upstairs door$/
+     */
+    public function someoneUnlocksTheUpstairsDoor()
+    {
+        $card = $this->getRandomCard(true);
+        $pin = $this->getCardPin($card);
+        $response = $this->restClient->get('/verifypin/'.$card.'/'.$pin.'.json')->send()->json();
+        $member = $response['member'];
+	$status = $this->restClient->get('/member/'.$member.'/checkin.json')->send()->json();
     }
 
     /**
