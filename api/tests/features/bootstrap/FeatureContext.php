@@ -130,7 +130,7 @@ class FeatureContext extends BehatContext
     }
 
     private function getCardPin() {
-        throw new PendingException();
+        return "1234";
     }
 
     /**
@@ -160,7 +160,7 @@ class FeatureContext extends BehatContext
             ),'cards' => array(
                 array('id' => $this->generateUniqueCardId(), 'desc' => $memberUserName ."'s keycard")
             ));
-            $this->restClient->get('/member/'.$memberUserName.'/setpin/')->send();
+            $this->restClient->get('/member/'.$memberUserName.'/setpin/1234')->send();
             $this->membersCollection->insert($document);
 	}
     }
