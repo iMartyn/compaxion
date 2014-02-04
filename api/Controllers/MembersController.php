@@ -88,6 +88,11 @@ class MembersController extends Controller {
         return $this->membersCollection->findOne(array('username'=>$username));
     }
 
+    public function userOfCard($cardid) {
+        $doc = $this->membersCollection->findOne(array('cards.id'=>$cardid),array('username'=>1));
+        return $doc['username'];
+    }
+
     public function verifyMemberPin($username,$pin) {
         $member = $this->membersCollection->findOne(array('username'=>$username),array('pin'=>true));
         return password_verify($pin,$member->pin);

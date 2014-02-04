@@ -148,6 +148,11 @@ $app->get('/devices/:username/hide', function ($username) use ($pimple) {
     outputJsonOrHTML($pimple['DevicesController'],$pimple,$pimple['DevicesController']->hideUsersDevices($username));
 });
 
+$app->get('/verifypin/:cardid/:pin', function ($cardid,$pin) use ($pimple) {
+    $username = $pimple['MembersController']->userOfCard($cardid);
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->verifyMemberPin($username,$pin));
+});
+
 $app->get('/', function() use ($pimple) { var_dump($pimple['app']->router->getCurrentRoute()); phpinfo(); });
 
 $app->get('/test/:what', function ($what) { var_dump($what); });
