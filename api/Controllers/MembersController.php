@@ -88,6 +88,16 @@ class MembersController extends Controller {
         return $this->membersCollection->findOne(array('username'=>$username));
     }
 
+    public function verifyMemberPin($username,$pin) {
+        $member = $this->membersCollection->findOne(array('username'=>$username),array('pin'=>true));
+        return password_verify($pin,$member->pin);
+    }
+
+    public function setMemberPin($username,$pin) {
+        $this->membersCollection->update(array('username'=>$username),array('$set'=>array('pin'=>password_hash($pin))));
+        return NULL; // You shouldn't be checking the outcome of this function!
+    }
+
     public function getAllMembers() {
         $cursor = $this->membersCollection->find();
         foreach ($cursor as $member) {

@@ -112,6 +112,10 @@ $app->get('/member/:username/checkout', function ($username) use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->checkoutMemberByUsername($username));
 });
 
+$app->get('/member/:username/verifypin/:pin', function ($username,$pin) use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->verifyMemberPin($username,$pin));
+});
+
 $app->get('/member', function () use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getAllMembers());
 });
