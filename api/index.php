@@ -116,6 +116,10 @@ $app->get('/member/:username/verifypin/:pin', function ($username,$pin) use ($pi
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->verifyMemberPin($username,$pin));
 });
 
+$app->get('/member/:username/setpin/:pin', function ($username,$pin) use ($pimple) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->setMemberPin($username,$pin));
+});
+
 $app->get('/member', function () use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getAllMembers());
 });

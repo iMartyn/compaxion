@@ -160,6 +160,7 @@ class FeatureContext extends BehatContext
             ),'cards' => array(
                 array('id' => $this->generateUniqueCardId(), 'desc' => $memberUserName ."'s keycard")
             ));
+            $this->restClient->get('/member/'.$memberUserName.'/setpin/')->send();
             $this->membersCollection->insert($document);
 	}
     }
