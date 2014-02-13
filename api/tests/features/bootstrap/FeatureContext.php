@@ -67,7 +67,7 @@ class FeatureContext extends BehatContext
         }
         $cursor = $this->membersCollection->find($params);
         $record = $cursor->limit(-1)->skip(rand(0, $cursor->count() - 1))->getNext();
-        $carddetail = $record['cards'][rand(0, count($record['cards']))];
+        $carddetail = $record['cards'][rand(0, count($record['cards'])-1)];
         return $carddetail['id']; //don't have to but might as well.
     }
 
@@ -169,8 +169,8 @@ class FeatureContext extends BehatContext
             ), 'cards' => array(
                 array('id' => $this->generateUniqueCardId(), 'desc' => $memberUserName . "'s keycard")
             ));
-            $this->restClient->get('/member/' . $memberUserName . '/setpin/1234')->send();
             $this->membersCollection->insert($document);
+            $this->restClient->get('/member/' . $memberUserName . '/setpin/1234.json')->send()->json();
         }
     }
 
@@ -331,11 +331,15 @@ class FeatureContext extends BehatContext
      */
     public function someoneUnlocksTheUpstairsDoor()
     {
-        $card = $this->getRandomCard(true);
+        $card = $this->getRandomCard(false);
         $pin = $this->getCardPin($card);
         $response = $this->restClient->get('/verifypin/' . $card . '/' . $pin . '.json')->send()->json();
+        if (!$response['pin_correct']) {
+            throw new Exception('Expected pin verification to work, spooky things happening at a distance.');
+        }
         $member = $response['member'];
-        $status = $this->restClient->get('/member/' . $member . '/checkin.json')->send()->json();
+        $this->arbitraryMember = $this->membersCollection->findOne(Array('username'=>$member));
+        $this->restClient->get('/member/' . $member . '/checkin.json')->send()->json();
     }
 
     /**

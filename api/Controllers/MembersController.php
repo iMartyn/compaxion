@@ -95,7 +95,11 @@ class MembersController extends Controller {
 
     public function verifyMemberPin($username,$pin) {
         $member = $this->membersCollection->findOne(array('username'=>$username),array('pin'=>true));
-        return password_verify($pin,$member->pin);
+        if (password_verify($pin,$member['pin'])) {
+            return array('pin_correct'=>true,'member'=>$username);
+        } else {
+            return array('pin_correct'=>false);
+        }
     }
 
     public function setMemberPin($username,$pin) {
