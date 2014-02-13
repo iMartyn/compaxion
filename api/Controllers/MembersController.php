@@ -99,7 +99,7 @@ class MembersController extends Controller {
     }
 
     public function setMemberPin($username,$pin) {
-        $this->membersCollection->update(array('username'=>$username),array('$set'=>array('pin'=>password_hash($pin))));
+        $this->membersCollection->update(array('username'=>$username),array('$set'=>array('pin'=>password_hash($pin, PASSWORD_DEFAULT))));
         return NULL; // You shouldn't be checking the outcome of this function!
     }
 
