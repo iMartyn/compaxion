@@ -7,6 +7,7 @@
 
 var express = require('express');
 var http = require('http');
+var request = require('request');
 var app = express();
 
 app.configure(function(){

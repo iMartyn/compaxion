@@ -2,6 +2,7 @@
 var CT = require('./modules/country-list');
 var AM = require('./modules/account-manager');
 var EM = require('./modules/email-dispatcher');
+var STATE = require('./modules/space-state');
 
 module.exports = function(app) {
 
