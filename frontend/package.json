@@ -1,17 +1,17 @@
 {
-	"name": "node-login",
-	"version": "1.3.2",
-	"description": "A template for quickly building login systems on top of Node.js & MongoDb",
+	"name": "compaxion-frontend",
+	"version": "0.0.0",
+	"description": "Frontend for the compaxion api",
 	"author": {
-		"name": "Stephen Braitsch",
-		"email": "stephen@braitsch.io"
+		"name": "Martyn Ranyard",
+		"email": "martyn@ranyard.info"
 	},
 	"website":{
-		"url": "node-login.braitsch.io"
+		"url": "martyn.ranyard.info"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/braitsch/node-login.git"
+		"url": "git://github.com/iMartyn/compaxion.git"
 	},
 	"private": true,
 	"dependencies": {
