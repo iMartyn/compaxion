@@ -5,19 +5,22 @@ html
 		link(rel='stylesheet', href='/vendor/bootstrap.min.css')
 		link(rel='stylesheet', href='/css/style.css')
 	body
-- system = typeof(udata) != 'undefined' ? udata : { }
+- user = typeof(udata) != 'undefined' ? udata : { }
+- spacestate = typeof(space) != 'undefined' ? space : { }
+	script.
+		state = !{JSON.stringify(spacestate)}
 	div.navbar.navbar-fixed-top
 		div.navbar-inner
 			div.container-fluid
 				ul#global-nav.nav.pull-left
 					a(href='#').brand Compaxion
-						if !system.space
-							|  - Space is in UNKNOWN state
-						else if system.space.open
+						if spacestate.status == 'Open'
 							|  - Space is open!
-						else
+						else if spacestate.status == 'Closed'
 							|  - Space is closed.
-				if system.user
+						else
+							|  - Space is in UNKNOWN state
+				if user.user
 					button#btn-logout.btn.btn-primary
 						i.icon-lock.icon-white
 						| Sign Out

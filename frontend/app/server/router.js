@@ -9,20 +9,25 @@ module.exports = function(app) {
 // main login page //
 
 	app.get('/', function(req, res){
-	// check if the user's credentials are saved in a cookie //
-		if (req.cookies.user == undefined || req.cookies.pass == undefined){
-			res.render('login', { title: 'Hello - Please Login To Your Account' });
-		}	else{
-	// attempt automatic login //
-			AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
-				if (o != null){
-				    req.session.user = o;
-					res.redirect('/home');
-				}	else{
-					res.render('login', { title: 'Hello - Please Login To Your Account' });
-				}
-			});
-		}
+        STATE.status(null,function(err, data) {
+            app.spaceState = data;
+        // check if the user's credentials are saved in a cookie //
+            if (req.cookies.user == undefined || req.cookies.pass == undefined){
+                console.log(app.spaceState);
+                res.render('login', { title: 'Hello - Please Login To Your Account', space: app.spaceState  });
+            }	else{
+        // attempt automatic login //
+                AM.autoLogin(req.cookies.user, req.cookies.pass, function(o){
+                    if (o != null){
+                        req.session.user = o;
+                        res.redirect('/home');
+                    }	else{
+                        console.log(spaceState);
+                        res.render('login', { title: 'Hello - Please Login To Your Account', space: app.spaceState });
+                    }
+                });
+            }
+        });
 	});
 	
 	app.post('/', function(req, res){
@@ -43,6 +48,9 @@ module.exports = function(app) {
 // logged-in user homepage //
 	
 	app.get('/home', function(req, res) {
+        STATE.status(null,function(err, data) {
+            app.spaceState = data;
+        });
 	    if (req.session.user == null){
 	// if user is not logged-in redirect back to login page //
 	        res.redirect('/');
@@ -50,7 +58,8 @@ module.exports = function(app) {
 			res.render('home', {
 				title : 'Control Panel',
 				countries : CT,
-				udata : req.session.user
+				udata : req.session.user,
+                state: app.spaceState
 			});
 	    }
 	});
@@ -86,7 +95,10 @@ module.exports = function(app) {
 // creating new accounts //
 	
 	app.get('/signup', function(req, res) {
-		res.render('signup', {  title: 'Signup', countries : CT });
+        STATE.status(null,function(err, data) {
+            app.spaceState = data;
+        });
+		res.render('signup', {  title: 'Signup', countries : CT, space: app.spaceState });
 	});
 	
 	app.post('/signup', function(req, res){
@@ -129,6 +141,9 @@ module.exports = function(app) {
 	});
 
 	app.get('/reset-password', function(req, res) {
+        STATE.status(null,function(err, data) {
+            app.spaceState = data;
+        });
 		var email = req.query["e"];
 		var passH = req.query["p"];
 		AM.validateResetLink(email, passH, function(e){
@@ -137,7 +152,7 @@ module.exports = function(app) {
 			} else{
 	// save the user's email in a session instead of sending to the client //
 				req.session.reset = { email:email, passHash:passH };
-				res.render('reset', { title : 'Reset Password' });
+				res.render('reset', { title : 'Reset Password', space: app.spaceState });
 			}
 		})
 	});
