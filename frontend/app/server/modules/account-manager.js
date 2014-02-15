@@ -1,19 +1,28 @@
 
-var crypto 		= require('crypto');
 var moment 		= require('moment');
+var request = require('request');
 
 /* login validation methods */
 
 exports.autoLogin = function(user, pass, callback)
 {
-    //TODO: Actually allow login!
-    callback({user: 'user'});
+    callback(null);
 }
 
 exports.manualLogin = function(user, pass, callback)
 {
-    //TODO: Actually allow login!
-    callback(null, {user: 'user'});
+    request({
+        url: 'http://api.compaxion-vm.dev/member/'+user+'/login',
+        method: 'POST',
+        headers: {Accept: 'application/json'},
+        form: {password: pass}
+    }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            callback(null,{user:user, pass:pass});
+        } else {
+            callback(null);
+        }
+    })
 }
 
 /* record insertion, update & deletion methods */
