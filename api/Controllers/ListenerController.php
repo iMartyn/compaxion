@@ -31,7 +31,7 @@ class ListenerController extends Controller {
         $this->mqttConnection = new phpMQTT($mqttBroker,$mqttPort,$mqttClientName);
     }
 
-    public function checkAuthorisation(\Slim\Route $route) {
+    public function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app) {
         //This is actually not a route controller, just easier to not descend a new class
         return true;
     }
