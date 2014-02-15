@@ -99,7 +99,7 @@ class SpaceController extends Controller {
         return $this->getStatus(true);
     }
 
-    public function checkAuthorisation(\Slim\Route $route) {
+    public function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app) {
         //TODO: Actually verify auth
         return true;
     }

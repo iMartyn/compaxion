@@ -120,6 +120,14 @@ $app->get('/member/:username/setpin/:pin', function ($username,$pin) use ($pimpl
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->setMemberPin($username,$pin));
 });
 
+$app->post('/member/:username/setpassword', function ($username) use ($pimple,$app) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->setMemberPassword($username,$app->request->post('password')));
+});
+
+$app->post('/member/:username/login', function ($username) use ($pimple,$app) {
+    outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->loginMember($username,$app->request->post('password')));
+});
+
 $app->get('/member', function () use ($pimple) {
     outputJsonOrHTML($pimple['MembersController'],$pimple,$pimple['MembersController']->getAllMembers());
 });
