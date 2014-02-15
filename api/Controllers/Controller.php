@@ -11,7 +11,8 @@ abstract class Controller {
     public function __construct(Pimple $di) {
         $this->app = $di['app'];
         $this->init($di);
-        if (!$this->isAuthorised($this->app->router->getCurrentRoute())) {
+        $route = $this->app->router->getCurrentRoute();
+        if (!$this->isAuthorised($route,$this->app)) {
             $this->app->halt(403, 'You do not have authorisation to access this.');
         }
         if (!$this->validateRequest()) {
@@ -103,11 +104,11 @@ abstract class Controller {
         return null;
     }
 
-    public function isAuthorised(\Slim\Route $route) {
-        return $this->checkAuthorisation($route);
+    public function isAuthorised(\Slim\Route $route, \Slim\Slim $app) {
+        return $this->checkAuthorisation($route, $app);
     }
 
-    public abstract function checkAuthorisation(\Slim\Route $route);
+    public abstract function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app);
 
     public abstract function init(Pimple $di);
 
