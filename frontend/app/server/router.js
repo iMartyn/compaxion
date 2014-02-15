@@ -13,7 +13,6 @@ module.exports = function(app) {
             app.spaceState = data;
         // check if the user's credentials are saved in a cookie //
             if (req.cookies.user == undefined || req.cookies.pass == undefined){
-                console.log(app.spaceState);
                 res.render('login', { title: 'Hello - Please Login To Your Account', space: app.spaceState  });
             }	else{
         // attempt automatic login //
@@ -22,7 +21,6 @@ module.exports = function(app) {
                         req.session.user = o;
                         res.redirect('/home');
                     }	else{
-                        console.log(spaceState);
                         res.render('login', { title: 'Hello - Please Login To Your Account', space: app.spaceState });
                     }
                 });
