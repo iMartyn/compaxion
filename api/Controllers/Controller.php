@@ -9,6 +9,8 @@ abstract class Controller {
 
     const sessionTimeOut = 300; //5*60; (5 mins)
     protected $app;
+    protected $apiUsers;
+    protected $mongoDatabase;
 
     public function init(Pimple $di) {
         $this->mongoDbConnection = new MongoClient;
@@ -126,10 +128,10 @@ abstract class Controller {
             if (array_key_exists('sessionkey',$document) &&
                 array_key_exists('sessionexpiry',$document) &&
                 $document['sessionexpiry'] > time() &&
-                $document['sessionkey'] == $headers['X-Sessionid']) {
+                $document['sessionkey'] == $copyheaders['X-Sessionid']) {
                 // Session key is valid, expiry is in the future, so we continue the session (resetting the session timeout)
                 $expirytime = time() + $this::sessionTimeOut;
-                $this->membersCollection->update(array('username'=>$headers['X-Username']),array('$set'=>array('sessionexpiry'=>$expirytime)));
+                $this->membersCollection->update(array('username'=>$copyheaders['X-Username']),array('$set'=>array('sessionexpiry'=>$expirytime)));
                 return true;
             }
         }
@@ -137,7 +139,27 @@ abstract class Controller {
     }
 
     private function isValidApiUser() {
-        //TODO: hummm.....
+        $headers = $this->app->request()->headers;
+        // The next two lines are because headers is some weird non-array-thing.
+        $copyheaders = array();
+        foreach ($headers as $key=>$value) $copyheaders[$key] = $value;
+        $doc = $this->apiUsers->findOne(array('apiKey'=>$copyheaders['X-Api-Key']),array('description'=>1));
+        $this->app->halt(500, var_export($doc, true));
+        try {
+            var_dump($doc);
+            die();
+            if (array_key_exists('X-Api-Key',$copyheaders) && array_key_exists('description',$this->apiUsers->findOne(array('apiKey'=>$copyheaders['X-Api-Key']),array('description'=>1)))) {
+                return true;
+            }
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    private function canUseThisRoute() {
+        //TODO: check the route's validity for that api or user.
+        // for now just say yes
+        return true;
     }
 
     public function isAuthorised(\Slim\Route $route, \Slim\Slim $app) {
@@ -148,8 +170,12 @@ abstract class Controller {
                 return true; // public route
             }
         }
-        //TODO: Check private routes against the DB
-        return false;
+        //TODO: Check private routes against the DB $this->isLoggedIn() ||
+        if ($this->isValidApiUser()) {
+            return $this->canUseThisRoute();
+        } else {
+            return false;
+        }
     }
 
 }

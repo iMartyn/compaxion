@@ -5,8 +5,6 @@
 
 class MembersController extends Controller {
 
-    private $mongoDbConnection = null;
-    private $mongoDatabase = null;
     private $membersCollection = null;
 
     public function init(Pimple $di) {

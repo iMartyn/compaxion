@@ -154,11 +154,21 @@ class FeatureContext extends BehatContext
             $this->spaceCollection = $this->mongoDatabase->space;
             $this->membersCollection = $this->mongoDatabase->members;
             $this->devicesCollection = $this->mongoDatabase->devices;
+            $this->apiUsers = $this->mongoDatabase->apiUsers;
+            $this->accessGroupsCollection = $this->mongoDatabase->accessGroups;
+            $this->accessRoutesCollection = $this->mongoDatabase->accessRoutes;
         }
         $document = $this->spaceCollection->remove(array());
         $defaultMembersPresent = 2;
         $document = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => $defaultMembersPresent);
         $this->spaceCollection->insert($document);
+        $document = $this->apiUsers->remove(array());
+        $this->apiKey = sha1($this->generateMacishString(10));
+        $document = array('description'=>'vagrantTester','apiKey'=>$this->apiKey,'access'=>'all');
+        $this->apiUsers->insert($document);
+        $document = $this->accessGroupsCollection->remove(array());
+        $document = array('routegroup'=>'all','regexs'=>array('all'=>'/.*/'));
+        $this->accessGroupsCollection->insert($document);
         $document = $this->membersCollection->remove(array());
         for ($i = 1; $i <= 10; $i++) {
             $memberIsPresent = ($i <= $defaultMembersPresent);
@@ -170,7 +180,7 @@ class FeatureContext extends BehatContext
                 array('id' => $this->generateUniqueCardId(), 'desc' => $memberUserName . "'s keycard")
             ));
             $this->membersCollection->insert($document);
-            $this->restClient->get('/member/' . $memberUserName . '/setpin/1234.json')->send()->json();
+            $this->restClient->get('/member/' . $memberUserName . '/setpin/1234.json', Array('X-Api-Key'=>$this->apiKey))->send()->json();
         }
     }
 

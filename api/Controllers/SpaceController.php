@@ -10,8 +10,6 @@ class SpaceController extends Controller {
     // Php doesn't allow class constants of arrays!
     private $defaultStatus = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => 2);
 
-    private $mongoDbConnection = null;
-    private $mongoDatabase = null;
     private $spaceCollection = null;
     private $membersCollection = null;
     private $listenerController = null;
