@@ -31,11 +31,6 @@ class ListenerController extends Controller {
         $this->mqttConnection = new phpMQTT($mqttBroker,$mqttPort,$mqttClientName);
     }
 
-    public function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app) {
-        //This is actually not a route controller, just easier to not descend a new class
-        return true;
-    }
-
     /* Should be moved out to a separate controller perhaps */
 
     private function mergeXML(&$base, $add)

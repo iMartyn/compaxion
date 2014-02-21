@@ -26,11 +26,6 @@ class DevicesController extends Controller {
         $this->listenerController->listenEvent('device.unknown.appear',function (){},true);
     }
 
-    public function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app) {
-        //TODO: Actually verify auth
-        return true;
-    }
-
     private function getMemberByMac($mac,$fields = Array()) {
         return $this->membersCollection->findOne(array("devices.mac"=>$mac),$fields);
 

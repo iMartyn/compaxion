@@ -98,9 +98,4 @@ class SpaceController extends Controller {
         $this->spaceCollection->findAndModify(null,$document);
         return $this->getStatus(true);
     }
-
-    public function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app) {
-        //TODO: Actually verify auth
-        return true;
-    }
 }

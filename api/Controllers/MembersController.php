@@ -5,8 +5,6 @@
 
 class MembersController extends Controller {
 
-    const sessionTimeOut = 300; //5*60; (5 mins)
-
     private $mongoDbConnection = null;
     private $mongoDatabase = null;
     private $membersCollection = null;
@@ -22,36 +20,6 @@ class MembersController extends Controller {
         $this->listenerController->listenEvent('device.disappear',function($data) { $this->membersDeviceDisappears($data); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('member.status.changed',function (){},true);
-    }
-
-    public function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app) {
-        //TODO: Actually verify auth
-        if (preg_match('/member\/[^\/]*\/login$/',$app->request()->getPath())) {
-            return true; // should always be able to login
-        }
-        $route_params = $route->getParams();
-        $headers = $app->request()->headers;
-        // The next two lines are because headers is some weird non-array-thing.
-        $copyheaders = array();
-        foreach ($headers as $key=>$value) $copyheaders[$key] = $value;
-        if (array_key_exists('X-Sessionid',$copyheaders) && array_key_exists('X-Username',$copyheaders)) {
-            $document = $this->membersCollection->findOne(array('username'=>$headers['X-Username']),array('sessionkey'=>true,'sessionexpiry'=>true,'admin'=>true));
-            if (array_key_exists('sessionkey',$document) &&
-                array_key_exists('sessionexpiry',$document) &&
-                $document['sessionexpiry'] > time() &&
-                $document['sessionkey'] == $headers['X-Sessionid'] &&
-                (
-                    (array_key_exists('username',$route_params) && $route_params['username'] == $headers['X-Username']) ||
-                    (array_key_exists('admin',$document) && $document['admin'])
-                )
-            ) {
-                //Reset the session timeout and continue
-                $expirytime = time() + $this::sessionTimeOut;
-                $this->membersCollection->update(array('username'=>$headers['X-Username']),array('$set'=>array('sessionexpiry'=>$expirytime)));
-                return true;
-            }
-        }
-        return false;
     }
 
     private function isMemberCheckedIn($username) {

@@ -6,7 +6,18 @@
 use Respect\Validation\Validator as validator;
 
 abstract class Controller {
+
+    const sessionTimeOut = 300; //5*60; (5 mins)
     protected $app;
+
+    public function init(Pimple $di) {
+        $this->mongoDbConnection = new MongoClient;
+        $this->mongoDatabase = $this->mongoDbConnection->compaxion;
+        $this->membersCollection = $this->mongoDatabase->members;
+        $this->apiUsers = $this->mongoDatabase->apiUsers;
+        $this->accessGroupsCollection = $this->mongoDatabase->accessGroups;
+        $this->accessRoutesCollection = $this->mongoDatabase->accessRoutes;
+    }
 
     public function __construct(Pimple $di) {
         $this->app = $di['app'];
@@ -104,12 +115,41 @@ abstract class Controller {
         return null;
     }
 
-    public function isAuthorised(\Slim\Route $route, \Slim\Slim $app) {
-        return $this->checkAuthorisation($route, $app);
+    private function isLoggedIn() {
+        $headers = $this->app->request()->headers;
+        // The next two lines are because headers is some weird non-array-thing.
+        $copyheaders = array();
+        foreach ($headers as $key=>$value) $copyheaders[$key] = $value;
+        // The request has a session id assigned to a user
+        if (array_key_exists('X-Sessionid',$copyheaders) && array_key_exists('X-Username',$copyheaders)) {
+            $document = $this->membersCollection->findOne(array('username'=>$headers['X-Username']),array('sessionkey'=>true,'sessionexpiry'=>true,'admin'=>true));
+            if (array_key_exists('sessionkey',$document) &&
+                array_key_exists('sessionexpiry',$document) &&
+                $document['sessionexpiry'] > time() &&
+                $document['sessionkey'] == $headers['X-Sessionid']) {
+                // Session key is valid, expiry is in the future, so we continue the session (resetting the session timeout)
+                $expirytime = time() + $this::sessionTimeOut;
+                $this->membersCollection->update(array('username'=>$headers['X-Username']),array('$set'=>array('sessionexpiry'=>$expirytime)));
+                return true;
+            }
+        }
+        return false;
     }
 
-    public abstract function checkAuthorisation(\Slim\Route $route, \Slim\Slim $app);
+    private function isValidApiUser() {
+        //TODO: hummm.....
+    }
 
-    public abstract function init(Pimple $di);
+    public function isAuthorised(\Slim\Route $route, \Slim\Slim $app) {
+
+        $publicRegExRoutes = Array('#/space/status#','#/member/[^/]/login$#');
+        foreach ($publicRegExRoutes as $aPublicRegExRoute) {
+            if (preg_match($aPublicRegExRoute,$app->request()->getPath())) {
+                return true; // public route
+            }
+        }
+        //TODO: Check private routes against the DB
+        return false;
+    }
 
 }
