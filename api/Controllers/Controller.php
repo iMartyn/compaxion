@@ -15,7 +15,6 @@ abstract class Controller {
     public function init(Pimple $di) {
         $this->mongoDbConnection = new MongoClient;
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
-        $someRandomVariable = $this->mongoDatabase->listCollections();
         $this->membersCollection = $this->mongoDatabase->members;
         $this->spaceCollection = $this->mongoDatabase->members;
         $this->apiUsers = $this->mongoDatabase->apiUsers;
