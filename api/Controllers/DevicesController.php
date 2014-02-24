@@ -7,21 +7,20 @@
 
 class DevicesController extends Controller {
 
-    private $membersCollection = null;
 
-    public function init(Pimple $di) {
-        $this->mongoDbConnection = new MongoClient;
-        $this->mongoDatabase = $this->mongoDbConnection->compaxion;
-        $this->membersCollection = $this->mongoDatabase->members;
+    public function registerListeners(Pimple $di) {
         $this->listenerController = $di['ListenerController'];
+        //These lines simply allows mqtt publishing without actually causing a hook.
+        $this->listenerController->listenEvent('device.appear',function (){},true);
+        $this->listenerController->listenEvent('device.disappear',function (){},true);
+        $this->listenerController->listenEvent('device.unknown.appear',function (){},true);
+    }
+
+    public function loadOtherRequiredControllers(Pimple $di) {
         // need to initialise the members controller so it can respond to events
         $this->membersController = $di['MembersController'];
         // need to initialise the space controller so it can respond to events
         $this->spaceController = $di['SpaceController'];
-        //This line simply allows mqtt publishing without actually causing a hook.
-        $this->listenerController->listenEvent('device.appear',function (){},true);
-        $this->listenerController->listenEvent('device.disappear',function (){},true);
-        $this->listenerController->listenEvent('device.unknown.appear',function (){},true);
     }
 
     private function getMemberByMac($mac,$fields = Array()) {

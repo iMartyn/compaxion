@@ -15,10 +15,21 @@ abstract class Controller {
     public function init(Pimple $di) {
         $this->mongoDbConnection = new MongoClient;
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
+        $someRandomVariable = $this->mongoDatabase->listCollections();
         $this->membersCollection = $this->mongoDatabase->members;
         $this->apiUsers = $this->mongoDatabase->apiUsers;
         $this->accessGroupsCollection = $this->mongoDatabase->accessGroups;
         $this->accessRoutesCollection = $this->mongoDatabase->accessRoutes;
+        $this->registerListeners($di);
+        $this->loadOtherRequiredControllers($di);
+    }
+
+    public function registerListeners(Pimple $di) {
+        // Specifically not making this abstract because controllers don't NEED to define any listeners.
+    }
+
+    public function loadOtherRequiredControllers(Pimple $di) {
+        // Specifically not making this abstract because controllers don't NEED to require any other controllers.
     }
 
     public function __construct(Pimple $di) {
@@ -143,11 +154,7 @@ abstract class Controller {
         // The next two lines are because headers is some weird non-array-thing.
         $copyheaders = array();
         foreach ($headers as $key=>$value) $copyheaders[$key] = $value;
-        $doc = $this->apiUsers->findOne(array('apiKey'=>$copyheaders['X-Api-Key']),array('description'=>1));
-        $this->app->halt(500, var_export($doc, true));
         try {
-            var_dump($doc);
-            die();
             if (array_key_exists('X-Api-Key',$copyheaders) && array_key_exists('description',$this->apiUsers->findOne(array('apiKey'=>$copyheaders['X-Api-Key']),array('description'=>1)))) {
                 return true;
             }

@@ -5,19 +5,19 @@
 
 class MembersController extends Controller {
 
-    private $membersCollection = null;
+    protected $listenerController;
 
-    public function init(Pimple $di) {
-        $this->mongoDbConnection = new MongoClient;
-        $this->mongoDatabase = $this->mongoDbConnection->compaxion;
-        $this->membersCollection = $this->mongoDatabase->members;
+    public function registerListeners(Pimple $di) {
         $this->listenerController = $di['ListenerController'];
-        // need to initialise the space controller so it can respond to events
-        $this->spaceController = $di['SpaceController'];
         $this->listenerController->listenEvent('device.appear',function($data) { $this->membersDeviceAppears($data); },true);
         $this->listenerController->listenEvent('device.disappear',function($data) { $this->membersDeviceDisappears($data); },true);
         //This line simply allows mqtt publishing without actually causing a hook.
         $this->listenerController->listenEvent('member.status.changed',function (){},true);
+    }
+
+    public function loadOtherRequiredControllers(Pimple $di) {
+        // need to initialise the space controller so it can respond to events
+        $this->spaceController = $di['SpaceController'];
     }
 
     private function isMemberCheckedIn($username) {

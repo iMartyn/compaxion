@@ -9,18 +9,11 @@ class SpaceController extends Controller {
 
     // Php doesn't allow class constants of arrays!
     private $defaultStatus = array('status' => 'Open', 'temperature' => 'Like Hoth', 'members_here' => 2);
-
-    private $spaceCollection = null;
-    private $membersCollection = null;
     private $listenerController = null;
-    private $membersController = null;
     private $di = null;
 
-    public function init(Pimple $di) {
-        $this->mongoDbConnection = new MongoClient;
-        $this->mongoDatabase = $this->mongoDbConnection->compaxion;
-        $this->spaceCollection = $this->mongoDatabase->space;
-        $this->membersCollection = $this->mongoDatabase->members;
+    public function registerListeners(Pimple $di) {
+        $this->listenerController = $di['ListenerController'];
         $this->listenerController = $di['ListenerController'];
         $this->listenerController->listenEvent('member.status.changed',function ($data){ $this->closeOrOpenIfWeShouldbe(); },true);
         $this->listenerController->listenEvent('device.disappear',function ($data){ $this->closeOrOpenIfWeShouldbe(); },true);
