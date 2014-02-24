@@ -17,6 +17,7 @@ abstract class Controller {
         $this->mongoDatabase = $this->mongoDbConnection->compaxion;
         $someRandomVariable = $this->mongoDatabase->listCollections();
         $this->membersCollection = $this->mongoDatabase->members;
+        $this->spaceCollection = $this->mongoDatabase->members;
         $this->apiUsers = $this->mongoDatabase->apiUsers;
         $this->accessGroupsCollection = $this->mongoDatabase->accessGroups;
         $this->accessRoutesCollection = $this->mongoDatabase->accessRoutes;

@@ -166,6 +166,7 @@ class FeatureContext extends BehatContext
         $this->apiKey = sha1($this->generateMacishString(10));
         $document = array('description'=>'vagrantTester','apiKey'=>$this->apiKey,'access'=>'all');
         $this->apiUsers->insert($document);
+        $this->restClient->setDefaultOption('headers',Array('X-Api-Key'=>$this->apiKey));
         $document = $this->accessGroupsCollection->remove(array());
         $document = array('routegroup'=>'all','regexs'=>array('all'=>'/.*/'));
         $this->accessGroupsCollection->insert($document);
@@ -180,7 +181,7 @@ class FeatureContext extends BehatContext
                 array('id' => $this->generateUniqueCardId(), 'desc' => $memberUserName . "'s keycard")
             ));
             $this->membersCollection->insert($document);
-            $this->restClient->get('/member/' . $memberUserName . '/setpin/1234.json', Array('X-Api-Key'=>$this->apiKey))->send()->json();
+            $this->restClient->get('/member/' . $memberUserName . '/setpin/1234.json')->send()->json();
         }
     }
 
